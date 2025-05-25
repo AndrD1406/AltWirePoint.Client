@@ -33,11 +33,11 @@ export class AuthService {
     }
 
     getRememberMe(): boolean {
-    return localStorage.getItem('rememberMe') === 'true';
+        return localStorage.getItem('rememberMe') === 'true';
     }
 
     setRememberMe(flag: boolean) {
-    localStorage.setItem('rememberMe', flag ? 'true' : 'false');
+        localStorage.setItem('rememberMe', flag ? 'true' : 'false');
     }
 
     getUserIdFromToken(): string | null {
@@ -53,5 +53,14 @@ export class AuthService {
         } catch {
         return null;
         }
+    }
+
+    logout(): void {
+        // remove JWT + refresh-token cookies
+        this.cookies.delete('jwt', '/');
+        this.cookies.delete('refreshToken', '/');
+
+        // if you were storing rememberMe in localStorage, clear it too:
+        localStorage.removeItem('rememberMe');
     }
 }

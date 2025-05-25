@@ -1,4 +1,9 @@
-<form #form="ngForm" (ngSubmit)="onSubmit(form)" novalidate class="w-full space-y-6">
+<form
+  #form="ngForm"
+  (ngSubmit)="onSubmit(form)"
+  novalidate
+  class="w-full space-y-6"
+>
     <div class="w-full">
         <textarea
         id="content"
@@ -6,7 +11,7 @@
         [required]="!model.image64"
         rows="8"
         maxlength="250"
-        placeholder="What’s happening?"
+        [placeholder]="'WhatsHappening' | localize"
         [(ngModel)]="model.content"
         #contentCtrl="ngModel"
         (paste)="onPaste($event)"
@@ -19,14 +24,14 @@
         *ngIf="contentCtrl.invalid && contentCtrl.touched && !model.image64"
         class="block mt-1 text-red-500"
         >
-        Content is required.
+        {{ 'ContentIsRequired' | localize }}
         </small>
     </div>
 
     <div *ngIf="previewUrl" class="w-full">
         <img
         [src]="previewUrl"
-        alt="preview"
+        [alt]="'Preview' | localize"
         class="w-full rounded-lg mb-2 border border-gray-600"
         />
         <button
@@ -50,7 +55,7 @@
         type="button"
         pButton
         icon="pi pi-upload"
-        label="Choose Image"
+        [label]="'ChooseImage' | localize"
         (click)="fileInput.click()"
         class="w-full inline-flex items-center justify-center px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-md"
         ></button>
@@ -59,7 +64,7 @@
     <p-message
         *ngIf="error"
         severity="error"
-        text="{{ error }}"
+        [text]="error"
         class="block"
     ></p-message>
 
@@ -67,14 +72,14 @@
         <button
         pButton
         type="button"
-        label="Cancel"
+        [label]="'Cancel' | localize"
         class="p-button-text text-white"
         (click)="onCancel()"
         ></button>
         <button
         pButton
         type="submit"
-        label="Save"
+        [label]="'Save' | localize"
         [disabled]="loading || (!model.content.trim() && !model.image64)"
         [loading]="loading"
         class="bg-green-600 hover:bg-green-700 text-white"

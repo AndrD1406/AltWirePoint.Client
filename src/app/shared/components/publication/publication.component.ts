@@ -2,11 +2,12 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { PublicationDto } from '../../api/service-proxies';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { LocalizePipe } from "../../pipes/localization.pipe";
 
 @Component({
     selector: 'app-publication',
     standalone: true,
-    imports: [CommonModule, RouterModule],
+    imports: [CommonModule, RouterModule, LocalizePipe],
     templateUrl: './publication.component.html',
     styleUrl: './publication.component.css'
 })

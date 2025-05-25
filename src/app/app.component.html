@@ -1,22 +1,47 @@
 <div class="layout">
-    <aside class="sidebar">
-        <p-panel-menu [model]="sideItems" styleClass="sidebar-menu">
-        </p-panel-menu>
+    <aside class="sidebar flex flex-col h-screen">
+        <p-panel-menu [model]="sideItems" styleClass="sidebar-menu"></p-panel-menu>
 
-        <div class="sidebar-footer">
-            <button pButton 
-                    type="button" 
-                    label="Post" 
-                    icon="pi pi-plus" 
-                    class="post-btn"
-                    (click)="openPostModal()">
-            </button>
+        <!-- footer now right under the menu -->
+        <div class="sidebar-footer p-4 space-y-4">
+        <select
+            [(ngModel)]="currentLang"
+            (ngModelChange)="switchLanguage($event)"
+            class="w-full bg-gray-700 text-white rounded px-2 py-1"
+        >
+            <option *ngFor="let l of languages" [value]="l.code">
+            {{ l.label }}
+            </option>
+        </select>
+
+        <button
+            pButton
+            type="button"
+            label="{{ 'Post' | localize }}"
+            icon="pi pi-plus"
+            class="w-full"
+            (click)="openPostModal()"
+        ></button>
+
+        <div
+            class="flex items-center cursor-pointer"
+            (click)="userMenu.toggle($event)"
+        >
+            <img
+            class="w-24 h-24 rounded-full object-cover"
+            [src]="getLogoSrc(userLogo)"
+            alt="User logo"
+            />
+            <span class="ml-2 text-white">{{ userName }}</span>
+        </div>
         </div>
     </aside>
 
     <main class="content">
         <router-outlet></router-outlet>
     </main>
+
+    <p-menu #userMenu [popup]="true" [model]="userMenuItems"></p-menu>
 
     <p-dialog
         header="New Publication"
@@ -25,15 +50,15 @@
         [closable]="false"
         [style]="{ width: '80vw', maxWidth: '600px' }"
         [contentStyle]="{
-            padding: '1rem',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'stretch'
+        padding: '1rem',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'stretch'
         }"
     >
         <app-create-or-edit-publication
-            (saved)="onPostSaved($event)"
-            (cancelled)="displayPostModal=false"
+        (saved)="onPostSaved($event)"
+        (cancelled)="displayPostModal = false"
         ></app-create-or-edit-publication>
     </p-dialog>
 </div>

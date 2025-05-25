@@ -1,1 +1,22 @@
-<p>search works!</p>
+<div class="p-4">
+    <div class="max-w-2xl mx-auto">
+        <div class="flex items-center rounded-full overflow-hidden bg-gray-800">
+        
+        <div class="flex items-center justify-center w-12 h-12 bg-gray-700">
+            <i class="pi pi-search text-gray-400 text-lg"></i>
+        </div>
+        
+        <input
+            type="text"
+            [(ngModel)]="searchQuery"
+            [placeholder]="'SearchPosts' | localize"
+            class="flex-1 px-4 py-3 bg-transparent text-white placeholder-gray-500 border-none focus:outline-none focus:ring-0"
+        />
+        </div>
+
+        <publications-container
+        [searchQuery]="searchQuery"
+        class="mt-6"
+        ></publications-container>
+    </div>
+</div>

@@ -5,20 +5,26 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { MessageModule } from 'primeng/message';
 import { AccountServiceProxy, EditProfileDto, ProfileDto, PublicationServiceProxy } from '../../api/service-proxies';
+import { LocalizationService } from '../../services/localization.service';
+import { AppComponentBase } from '../../app-component-base';
+import { LocalizePipe } from "../../pipes/localization.pipe";
 
 @Component({
     selector: 'edit-profile',
     standalone: true,
     imports: [
-        CommonModule,
-        FormsModule,
-        ButtonModule,
-        InputTextModule,
-        MessageModule
-    ],
+    CommonModule,
+    FormsModule,
+    ButtonModule,
+    InputTextModule,
+    MessageModule,
+    LocalizePipe
+],
     templateUrl: './edit-profile.component.html'
 })
-export class EditProfileComponent {
+export class EditProfileComponent
+  extends AppComponentBase
+{
     @Input() model: EditProfileDto = new EditProfileDto();
     @Output() saved     = new EventEmitter<ProfileDto>();
     @Output() cancelled = new EventEmitter<void>();
@@ -27,7 +33,12 @@ export class EditProfileComponent {
     loading = false;
     error?: string;
 
-    constructor(private accountService: AccountServiceProxy) {}
+    constructor(
+        private accountService: AccountServiceProxy,
+        loc: LocalizationService
+    ) {
+        super(loc);
+    }
 
     onFileChange(event: Event) {
         const input = event.target as HTMLInputElement;
@@ -51,30 +62,29 @@ export class EditProfileComponent {
     }
 
     private loadFile(file: File) {
-        const maxPx = 1024; // or whatever limit you want
-
+        const maxPx = 1024;
         const reader = new FileReader();
         reader.onload = () => {
-            const dataUrl = reader.result as string;
-            const img = new Image();
-            img.onload = () => {
+        const dataUrl = reader.result as string;
+        const img = new Image();
+        img.onload = () => {
             if (img.naturalWidth > maxPx || img.naturalHeight > maxPx) {
-                this.error = `Image must be at most ${maxPx}px × ${maxPx}px.`;
-                this.previewUrl = null;
-                this.model.logo = undefined;
+            this.error = this.t('ImageTooLarge').replace('{0}', maxPx.toString());
+            this.previewUrl = null;
+            this.model.logo = undefined;
             } else {
-                this.error = undefined;
-                this.previewUrl = dataUrl;
-                this.model.logo = dataUrl.split(',')[1];
+            this.error = undefined;
+            this.previewUrl = dataUrl;
+            this.model.logo = dataUrl.split(',')[1];
             }
-            };
-            img.onerror = () => {
-            this.error = 'Invalid image file.';
-            };
-            img.src = dataUrl;
+        };
+        img.onerror = () => {
+            this.error = this.t('InvalidImageFile');
+        };
+        img.src = dataUrl;
         };
         reader.readAsDataURL(file);
-        }
+    }
 
     clearImage() {
         this.previewUrl = null;
@@ -86,16 +96,15 @@ export class EditProfileComponent {
         this.loading = true;
         this.error   = undefined;
 
-        this.accountService.editProfile(this.model)
-        .subscribe({
-            next: updated => {
+        this.accountService.editProfile(this.model).subscribe({
+        next: updated => {
             this.loading = false;
             this.saved.emit(updated);
-            },
-            error: err => {
+        },
+        error: err => {
             this.loading = false;
-            this.error = err.error?.detail || 'Update failed';
-            }
+            this.error = err.error?.detail || this.t('UpdateFailed');
+        }
         });
     }
 

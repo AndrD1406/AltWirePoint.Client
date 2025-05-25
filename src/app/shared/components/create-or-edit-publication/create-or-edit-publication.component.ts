@@ -4,14 +4,18 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
 import { CommonModule } from '@angular/common';
+import { LocalizationService } from '../../services/localization.service';
+import { AppComponentBase } from '../../app-component-base';
+import { LocalizePipe } from "../../pipes/localization.pipe";
 
 @Component({
     selector: 'app-create-or-edit-publication',
     standalone: true,
-    imports: [FormsModule, ButtonModule, MessageModule, CommonModule],
+    imports: [FormsModule, ButtonModule, MessageModule, CommonModule, LocalizePipe],
     templateUrl: './create-or-edit-publication.component.html'
 })
-export class CreateOrEditPublicationComponent {
+export class CreateOrEditPublicationComponent extends AppComponentBase
+{
     @Output() saved = new EventEmitter<Publication>();
     @Output() cancelled = new EventEmitter<void>();
 
@@ -20,7 +24,12 @@ export class CreateOrEditPublicationComponent {
     loading = false;
     error?: string;
 
-    constructor(private publicationService: PublicationServiceProxy) {}
+    constructor(
+        private publicationService: PublicationServiceProxy,
+        loc: LocalizationService
+    ) {
+        super(loc);
+    }
 
     onFileChange(event: Event) {
         const input = event.target as HTMLInputElement;
@@ -71,7 +80,8 @@ export class CreateOrEditPublicationComponent {
         },
         error: err => {
             this.loading = false;
-            this.error = err.error?.detail || 'Creation failed';
+            this.error =
+            err.error?.detail || this.t('CreationFailed');
         }
         });
     }

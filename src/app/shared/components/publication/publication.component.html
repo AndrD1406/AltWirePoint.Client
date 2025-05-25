@@ -1,55 +1,50 @@
 <div class="shadow rounded-2xl p-4 flex flex-col gap-3">
-    <!-- Header -->
     <div class="flex items-center gap-3">
-    <!-- clicking avatar or name routes to that user’s profile -->
-    <a
+        <a
         [routerLink]="['/profile', publication.authorId]"
         class="flex items-center gap-3"
-    >
+        >
         <img
-        class="w-10 h-10 rounded-full object-cover"
-        [src]="avatarSrc"
-        [alt]="publication.authorName
-                ? publication.authorName + ' logo'
-                : 'User logo'"
+            class="w-10 h-10 rounded-full object-cover"
+            [src]="avatarSrc"
+            [alt]="publication.authorName
+            ? (publication.authorName + ' ' + ('UserLogo' | localize))
+            : ('Unknown' | localize)"
         />
         <span class="font-semibold text-base">
-        {{ publication.authorName || 'Unknown' }}
+            {{ publication.authorName || ('Unknown' | localize) }}
         </span>
-    </a>
+        </a>
     </div>
 
-    <!-- Content -->
     <div class="text-sm leading-relaxed">
-    {{ publication.content }}
+        {{ publication.content }}
     </div>
 
-    <!-- Image -->
     <div *ngIf="publication.image64" class="mt-2">
-    <img
+        <img
         class="w-full rounded-lg"
         [src]="'data:image/png;base64,' + publication.image64"
-        alt="Publication image"
-    />
+        [alt]="'PublicationImage' | localize"
+        />
     </div>
 
-    <!-- Actions -->
     <div class="flex items-center gap-6 mt-2">
-    <button
+        <button
         type="button"
         (click)="onLike()"
         class="flex items-center gap-1 px-2 py-1 rounded-xl hover:bg-gray-800/50 transition"
-    >
+        >
         <i class="pi pi-thumbs-up"></i>
-        <span>Like {{ publication.likes?.length || 0 }}</span>
-    </button>
-    <button
+        <span>{{ 'Like' | localize }} {{ publication.likes?.length || 0 }}</span>
+        </button>
+        <button
         type="button"
         (click)="onComment()"
         class="flex items-center gap-1 px-2 py-1 rounded-xl hover:bg-gray-800/50 transition"
-    >
+        >
         <i class="pi pi-comments"></i>
-        <span>Comment</span>
-    </button>
+        <span>{{ 'Comment' | localize }}</span>
+        </button>
     </div>
 </div>

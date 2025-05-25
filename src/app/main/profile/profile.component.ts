@@ -7,11 +7,12 @@ import { Dialog } from 'primeng/dialog';
 import { NgForm } from '@angular/forms';
 import { EditProfileComponent } from '../../shared/components/edit-profile/edit-profile.component';
 import { PublicationsContainerComponent } from '../../shared/components/publications-container/publications-container.component';
+import { LocalizePipe } from "../../shared/pipes/localization.pipe";
 
 @Component({
     selector: 'app-profile',
     standalone: true,
-    imports: [CommonModule, PublicationsContainerComponent, Dialog, EditProfileComponent],
+    imports: [CommonModule, PublicationsContainerComponent, Dialog, EditProfileComponent, LocalizePipe],
     templateUrl: './profile.component.html',
     styleUrl: './profile.component.css'
 })

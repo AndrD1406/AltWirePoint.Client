@@ -1,86 +1,89 @@
 <form #form="ngForm"
-      (ngSubmit)="onSubmit(form)"
-      (paste)="onPaste($event)"
-      novalidate
-      class="w-full space-y-6">
+        (ngSubmit)="onSubmit(form)"
+        (paste)="onPaste($event)"
+        novalidate
+        class="w-full space-y-6">
 
-  <!-- Name -->
-  <div class="w-full">
-    <label for="name" class="block text-white mb-1">Name</label>
-    <input
-      id="name"
-      name="name"
-      required
-      [(ngModel)]="model.name"
-      #nameCtrl="ngModel"
-      pInputText
-      class="w-full p-2 border border-gray-300 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none"
-    />
-    <small *ngIf="nameCtrl.invalid && nameCtrl.touched"
-           class="block mt-1 text-red-500">
-      Name is required.
-    </small>
-  </div>
-
-  <!-- Logo Upload / Paste -->
-  <div class="w-full text-center">
-    <div *ngIf="previewUrl" class="relative inline-block">
-      <img
-        [src]="previewUrl"
-        alt="Logo preview"
-        class="w-24 h-24 rounded-full object-cover mx-auto border border-gray-600"
-      />
-      <button
-        type="button"
-        pButton
-        icon="pi pi-trash"
-        class="absolute top-0 right-0 p-2 bg-red-600 hover:bg-red-700 text-white rounded-full"
-        (click)="clearImage()"
-      ></button>
+    <div class="w-full">
+        <label for="name" class="block text-white mb-1">
+        {{ 'Name' | localize }}
+        </label>
+        <input
+        id="name"
+        name="name"
+        required
+        [(ngModel)]="model.name"
+        #nameCtrl="ngModel"
+        pInputText
+        class="w-full p-2 border border-gray-300 rounded-md bg-gray-800
+                text-white placeholder-gray-400 focus:outline-none"
+        />
+        <small *ngIf="nameCtrl.invalid && nameCtrl.touched"
+            class="block mt-1 text-red-500">
+        {{ 'NameIsRequired' | localize }}
+        </small>
     </div>
-    <div *ngIf="!previewUrl" class="space-y-2">
-      <input
-        #fileInput
-        type="file"
-        accept="image/*"
-        (change)="onFileChange($event)"
-        hidden
-      />
-      <button
-        type="button"
-        pButton
-        icon="pi pi-upload"
-        label="Choose Logo Image"
-        (click)="fileInput.click()"
-        class="inline-flex items-center justify-center px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-md"
-      ></button>
-      <div class="text-sm text-gray-400">Or paste an image</div>
+
+    <div class="w-full text-center">
+        <div *ngIf="previewUrl" class="relative inline-block">
+        <img
+            [src]="previewUrl"
+            [alt]="'LogoPreview' | localize"
+            class="w-24 h-24 rounded-full object-cover mx-auto border border-gray-600"
+        />
+        <button
+            type="button"
+            pButton
+            icon="pi pi-trash"
+            class="absolute top-0 right-0 p-2 bg-red-600 hover:bg-red-700
+                text-white rounded-full"
+            (click)="clearImage()"
+        ></button>
+        </div>
+        <div *ngIf="!previewUrl" class="space-y-2">
+        <input
+            #fileInput
+            type="file"
+            accept="image/*"
+            (change)="onFileChange($event)"
+            hidden
+        />
+        <button
+            type="button"
+            pButton
+            icon="pi pi-upload"
+            label="{{ 'ChooseLogoImage' | localize }}"
+            (click)="fileInput.click()"
+            class="inline-flex items-center justify-center px-4 py-2
+                bg-green-500 hover:bg-green-600 text-white rounded-md"
+        ></button>
+        <div class="text-sm text-gray-400">
+            {{ 'OrPasteAnImage' | localize }}
+        </div>
+        </div>
     </div>
-  </div>
 
-  <!-- Error Message -->
-  <p-message *ngIf="error"
-             severity="error"
-             text="{{ error }}"
-             class="block">
-  </p-message>
+    <p-message *ngIf="error"
+                severity="error"
+                [text]="error"
+                class="block">
+    </p-message>
 
-  <!-- Actions -->
-  <div class="flex justify-end space-x-3">
-    <button
-      pButton
-      type="button"
-      label="Cancel"
-      class="p-button-text text-white"
-      (click)="onCancel()"
-    ></button>
-    <button
-      pButton
-      type="submit"
-      label="Save"
-      [disabled]="loading || form.invalid"
-      [loading]="loading"
-      class="bg-green-600 hover:bg-green-700 text-white"
-    ></button>
-  </div>
+    <div class="flex justify-end space-x-3">
+        <button
+        pButton
+        type="button"
+        label="{{ 'Cancel' | localize }}"
+        class="p-button-text text-white"
+        (click)="onCancel()"
+        ></button>
+        <button
+        pButton
+        type="submit"
+        label="{{ 'Save' | localize }}"
+        [disabled]="loading || form.invalid"
+        [loading]="loading"
+        class="bg-green-600 hover:bg-green-700 text-white"
+        ></button>
+    </div>
 </form>
