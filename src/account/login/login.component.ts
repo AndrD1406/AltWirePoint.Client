@@ -9,19 +9,21 @@ import { MessageModule }           from 'primeng/message';
 import { CookieService }           from 'ngx-cookie-service';
 import { AccountServiceProxy, LoginDto, AuthenticationResponse } from '../../app/shared/api/service-proxies';
 import { AuthService } from '../../app/shared/api/auth.service';
+import { LocalizePipe } from "../../app/shared/pipes/localization.pipe";
 
 @Component({
     selector: 'app-login',
     standalone: true,
     imports: [
-        CommonModule,
-        FormsModule,
-        RouterModule,
-        InputTextModule,
-        PasswordModule,
-        ButtonModule,
-        MessageModule
-    ],
+    CommonModule,
+    FormsModule,
+    RouterModule,
+    InputTextModule,
+    PasswordModule,
+    ButtonModule,
+    MessageModule,
+    LocalizePipe
+],
     templateUrl: './login.component.html',
     styleUrls: ['./login.component.css']
 })
@@ -51,16 +53,12 @@ export class LoginComponent {
 
         this.api.login(dto).subscribe({
         next: (resp: AuthenticationResponse) => {
-            // 1) remember the “remember me” choice
             this.authService.setRememberMe(this.model.rememberMe);
-
-            // 2) store tokens (handles expiry, sameSite, secure, etc.)
             this.authService.storeTokens(resp, this.model.rememberMe);
-
             this.router.navigate(['/']);
         },
         error: err => {
-            this.error = err.error?.detail || 'Login failed';
+            this.error = err.error?.detail || 'LoginFailed';
             this.loading = false;
         }
         });

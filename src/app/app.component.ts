@@ -36,7 +36,8 @@ import { CommonModule } from '@angular/common';
     styleUrls: ['./app.component.css']
 })
 export class AppComponent extends AppComponentBase implements OnInit {
-    currentLang = 'en';
+    // load from localStorage or default to 'en'
+    currentLang = localStorage.getItem('currentLang') || 'en';
 
     languages = [
         { code: 'en', label: 'English' },
@@ -61,47 +62,47 @@ export class AppComponent extends AppComponentBase implements OnInit {
     ngOnInit(): void {
         const myId = this.authService.getUserIdFromToken();
 
-        this.buildMenus();
-
         this.loc.loadTranslations(this.currentLang)
-        .subscribe(() => this.buildMenus());
+            .subscribe(() => this.buildMenus());
 
         if (myId) {
-        this.publicationService.getUserById(myId)
-            .subscribe((profile: ProfileDto) => {
-            this.userName = profile.name || '';
-            this.userLogo = profile.logo;
-            });
+            this.publicationService.getUserById(myId)
+                .subscribe((profile: ProfileDto) => {
+                    this.userName = profile.name || '';
+                    this.userLogo = profile.logo;
+                });
         }
     }
 
     switchLanguage(lang: string): void {
         this.currentLang = lang;
-        this.loc.loadTranslations(lang).subscribe(() => this.buildMenus());
+        localStorage.setItem('currentLang', lang);
+        this.loc.loadTranslations(lang)
+            .subscribe(() => this.buildMenus());
     }
 
     private buildMenus(): void {
         const myId = this.authService.getUserIdFromToken();
 
         this.sideItems = [
-        { label: this.t('Main'),    icon: 'pi pi-home',   routerLink: ['/home'] },
-        { label: this.t('Search'),  icon: 'pi pi-search', routerLink: ['/search'] },
-        { label: this.t('Profile'), icon: 'pi pi-user',   routerLink: ['/profile', myId] },
-        {
-            label: this.t('More'),
-            items: [
-            { label: this.t('Settings'), icon: 'pi pi-cog',  routerLink: ['/settings'] },
-            { label: this.t('Help'),     icon: 'pi pi-info', routerLink: ['/help']     }
-            ]
-        }
+            { label: this.t('Main'),    icon: 'pi pi-home',   routerLink: ['/home']   },
+            { label: this.t('Search'),  icon: 'pi pi-search', routerLink: ['/search'] },
+            { label: this.t('Profile'), icon: 'pi pi-user',   routerLink: ['/profile', myId] },
+            {
+                label: this.t('More'),
+                items: [
+                    { label: this.t('Settings'), icon: 'pi pi-cog',  routerLink: ['/settings'] },
+                    { label: this.t('Help'),     icon: 'pi pi-info', routerLink: ['/help']     }
+                ]
+            }
         ];
 
         this.userMenuItems = [
-        {
-            label: this.t('Logout'),
-            icon: 'pi pi-sign-out',
-            command: () => this.onLogout()
-        }
+            {
+                label: this.t('Logout'),
+                icon: 'pi pi-sign-out',
+                command: () => this.onLogout()
+            }
         ];
     }
 
@@ -111,7 +112,7 @@ export class AppComponent extends AppComponentBase implements OnInit {
 
     onPostSaved(pub: PublicationDto): void {
         this.displayPostModal = false;
-        // … anything else …
+        // … additional handling if needed …
     }
 
     override getLogoSrc(logo?: string): string {

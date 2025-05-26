@@ -18,7 +18,7 @@
         class="w-full p-4 text-base resize-y border border-gray-300 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none"
         ></textarea>
         <div class="mt-1 text-sm text-gray-500 text-right">
-        {{ model.content.length }} / 250
+        {{ model.content?.length || 0 }} / 250
         </div>
         <small
         *ngIf="contentCtrl.invalid && contentCtrl.touched && !model.image64"
@@ -80,7 +80,7 @@
         pButton
         type="submit"
         [label]="'Save' | localize"
-        [disabled]="loading || (!model.content.trim() && !model.image64)"
+        [disabled]="loading || (!model.content?.trim() && !model.image64)"
         [loading]="loading"
         class="bg-green-600 hover:bg-green-700 text-white"
         ></button>

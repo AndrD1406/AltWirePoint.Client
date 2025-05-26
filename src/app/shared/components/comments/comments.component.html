@@ -1,0 +1,45 @@
+<div class="comments-container space-y-4">
+    <div *ngIf="loading" class="text-center text-gray-500">
+        {{ 'LoadingComments' | localize }}
+    </div>
+
+    <p-message
+        *ngIf="error"
+        severity="error"
+        [text]="error"
+        class="block"
+    ></p-message>
+
+    <div
+        *ngIf="!loading && !error && comments.length === 0"
+        class="text-center text-gray-500"
+    >
+        {{ 'NoCommentsFound' | localize }}
+    </div>
+
+    <div *ngFor="let c of comments" class="flex items-start gap-3">
+        <img
+        [src]="getAvatarSrc(c.authorLogo)"
+        [alt]="c.authorName"
+        class="w-8 h-8 rounded-full object-cover mt-1"
+        />
+
+        <div class="flex-1">
+        <div class="flex justify-between items-baseline">
+            <span class="font-semibold text-sm">{{ c.authorName }}</span>
+            <small class="text-xs text-gray-400">
+            {{ c.createdAt | date:'short' }}
+            </small>
+        </div>
+
+        <p class="text-sm mt-1">{{ c.content }}</p>
+
+        <img
+            *ngIf="c.image64"
+            [src]="'data:image/png;base64,' + c.image64"
+            [alt]="'CommentImage' | localize"
+            class="mt-2 rounded-lg max-w-full"
+        />
+        </div>
+    </div>
+</div>

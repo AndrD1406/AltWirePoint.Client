@@ -1,5 +1,12 @@
-<div class="shadow rounded-2xl p-4 flex flex-col gap-3">
-    <div class="flex items-center gap-3">
+<p-confirmDialog></p-confirmDialog>
+
+<!-- make entire card clickable for detail view -->
+<div
+  class="shadow rounded-2xl p-4 flex flex-col gap-3 cursor-pointer hover:bg-gray-800/10"
+  (click)="onView()"
+>
+    <!-- HEADER: avatar + name + edit/delete menu -->
+    <div class="flex items-center justify-between" (click)="$event.stopPropagation()">
         <a
         [routerLink]="['/profile', publication.authorId]"
         class="flex items-center gap-3"
@@ -15,8 +22,25 @@
             {{ publication.authorName || ('Unknown' | localize) }}
         </span>
         </a>
+
+        <ng-container *ngIf="isOwn">
+        <button
+            pButton
+            type="button"
+            icon="pi pi-ellipsis-v"
+            styleClass="p-button-text text-gray-500 hover:text-white"
+            (click)="menu.toggle($event)"
+        ></button>
+        <p-menu
+            #menu
+            [popup]="true"
+            [model]="menuItems"
+            appendTo="body"
+        ></p-menu>
+        </ng-container>
     </div>
 
+    <!-- BODY -->
     <div class="text-sm leading-relaxed">
         {{ publication.content }}
     </div>
@@ -29,6 +53,7 @@
         />
     </div>
 
+    <!-- FOOTER: like & comment -->
     <div class="flex items-center gap-6 mt-2">
         <button
         type="button"
@@ -48,3 +73,18 @@
         </button>
     </div>
 </div>
+
+<!-- EDIT DIALOG -->
+<p-dialog
+  header="{{ 'EditPublication' | localize }}"
+  [(visible)]="showEditDialog"
+  [modal]="true"
+  [closable]="false"
+  [style]="{ width: '80vw', maxWidth: '600px' }"
+>
+    <app-create-or-edit-publication
+        [model]="updateModel"
+        (saved)="onSaveEdited($event)"
+        (cancelled)="showEditDialog = false"
+    ></app-create-or-edit-publication>
+</p-dialog>

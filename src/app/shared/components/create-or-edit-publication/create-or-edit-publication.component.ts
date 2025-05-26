@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { IPublicationCreateDto, Publication, PublicationCreateDto, PublicationServiceProxy } from '../../api/service-proxies';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -19,7 +19,7 @@ export class CreateOrEditPublicationComponent extends AppComponentBase
     @Output() saved = new EventEmitter<Publication>();
     @Output() cancelled = new EventEmitter<void>();
 
-    model: Required<IPublicationCreateDto> = { content: '', image64: '' };
+    @Input() model: PublicationCreateDto = new PublicationCreateDto();
     previewUrl: string | ArrayBuffer | null = null;
     loading = false;
     error?: string;

@@ -14,10 +14,10 @@ import {
   setAttributes,
   toKebabCase,
   toTokenKey
-} from "./chunk-FDNTLRD5.js";
+} from "./chunk-47JVB4WY.js";
 import {
   DOCUMENT
-} from "./chunk-GU5LMDBK.js";
+} from "./chunk-NV5NMVNX.js";
 import {
   Injectable,
   InjectionToken,
@@ -1483,4 +1483,4 @@ export {
   PRIME_NG_CONFIG,
   providePrimeNG
 };
-//# sourceMappingURL=chunk-ZHRZHNYQ.js.map
+//# sourceMappingURL=chunk-PPOQGAMT.js.map

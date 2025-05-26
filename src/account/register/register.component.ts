@@ -7,19 +7,21 @@ import { ButtonModule }          from 'primeng/button';
 import { MessageModule }         from 'primeng/message';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { LocalizePipe } from "../../app/shared/pipes/localization.pipe";
 
 @Component({
     selector: 'app-register',
     standalone: true,
     imports: [
-        CommonModule,
-        FormsModule,
-        RouterModule,
-        InputTextModule,
-        PasswordModule,
-        ButtonModule,
-        MessageModule
-    ],
+    CommonModule,
+    FormsModule,
+    RouterModule,
+    InputTextModule,
+    PasswordModule,
+    ButtonModule,
+    MessageModule,
+    LocalizePipe
+],
     templateUrl: './register.component.html',
     styleUrls: ['./register.component.css']
 })

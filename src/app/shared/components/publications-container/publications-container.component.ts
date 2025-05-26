@@ -20,9 +20,7 @@ import { AppComponentBase } from '../../app-component-base';
     styleUrl: './publications-container.component.css',
     
 })
-export class PublicationsContainerComponent
-    extends AppComponentBase
-    implements OnInit
+export class PublicationsContainerComponent extends AppComponentBase implements OnInit
 {
     @Input() authorId?: string;
 
@@ -41,6 +39,9 @@ export class PublicationsContainerComponent
 
     @ViewChild('scrollContainer', { static: true })
     scrollContainer!: ElementRef<HTMLElement>;
+
+    selectedPub?: PublicationDto;
+    showDetailDialog = false;
 
     publications: PublicationDto[] = [];
     skip = 0;
@@ -72,6 +73,13 @@ export class PublicationsContainerComponent
         this.publications = [];
         this.allLoaded = false;
         this.loadNextPage();
+    }
+
+    handleView(id: string) {
+        const p = this.publications.find(x => x.id === id);
+        if (!p) return;
+        this.selectedPub = p;
+        this.showDetailDialog = true;
     }
 
     trackByPub(_: number, pub: PublicationDto) {

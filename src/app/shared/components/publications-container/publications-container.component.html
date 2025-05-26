@@ -1,4 +1,8 @@
-<div #scrollContainer class="max-h-screen overflow-auto" (scroll)="onScroll()">
+<div
+    #scrollContainer
+    class="max-h-screen overflow-auto"
+    (scroll)="onScroll()"
+    >
     <div class="flex flex-col gap-4 p-4 max-w-2xl mx-auto border-r border-white/20">
         <app-publication
         *ngFor="let pub of publications; trackBy: trackByPub"
@@ -10,15 +14,16 @@
         <div *ngIf="loading && !allLoaded" class="text-center py-4 text-gray-500">
         {{ 'LoadingPosts' | localize }}
         </div>
-        <div *ngIf="allLoaded && publications.length>0" class="text-center py-4 text-gray-500">
+        <div *ngIf="allLoaded && publications.length > 0" class="text-center py-4 text-gray-500">
         {{ 'NoMorePosts' | localize }}
         </div>
-        <div *ngIf="allLoaded && publications.length===0" class="text-center py-4 text-gray-500">
+        <div *ngIf="allLoaded && publications.length === 0" class="text-center py-4 text-gray-500">
         {{ 'NoPostsFound' | localize }}
         </div>
     </div>
 </div>
 
+<!-- Add Comment Dialog -->
 <p-dialog
     header="{{ 'AddComment' | localize }}"
     [(visible)]="showCommentDialog"
@@ -26,7 +31,7 @@
     [closable]="false"
     [style]="{ width: '80vw', maxWidth: '400px' }"
     (onHide)="cancelComment()"
-    >
+>
     <form
         #form="ngForm"
         (ngSubmit)="submitComment(form)"
@@ -53,7 +58,7 @@
         <div *ngIf="previewUrl" class="relative">
         <img
             [src]="getImageSrc(previewUrl)"
-            alt="{{ 'Preview' | localize }}"
+            [alt]="'Preview' | localize"
             class="w-full rounded-lg mb-2 border border-gray-600"
         />
         <button
@@ -87,10 +92,10 @@
         </div>
 
         <p-message
-            *ngIf="commentError"
-            severity="error"
-            [text]="commentError"
-            class="block"
+        *ngIf="commentError"
+        severity="error"
+        [text]="commentError"
+        class="block"
         ></p-message>
 
         <div class="flex justify-end space-x-3">

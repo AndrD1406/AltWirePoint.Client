@@ -1,61 +1,85 @@
 <div class="login-container flex flex-col items-center justify-center min-h-screen">
-<h1 class="text-4xl font-bold text-white mb-1">AltMed</h1>
-<p class="text-sm text-gray-300 mb-6">Alternative Media Platform</p>
+    <h1 class="text-4xl font-bold text-white mb-1">{{ 'AltMed' | localize }}</h1>
+    <p class="text-sm text-gray-300 mb-6">{{ 'AlternativeMediaPlatform' | localize }}</p>
 
-<h2 class="text-3xl font-semibold text-white mb-4">Login</h2>
+    <h2 class="text-3xl font-semibold text-white mb-4">{{ 'Login' | localize }}</h2>
 
-<form #form="ngForm" (ngSubmit)="onSubmit(form)" novalidate class="w-full max-w-sm">
-    <div class="p-field mb-4">
-    <label for="email" class="block text-sm font-medium text-white mb-1">Email</label>
-    <input
-        id="email"
-        name="email"
-        type="email"
-        pInputText
-        required
-        [(ngModel)]="model.email"
-        #emailCtrl="ngModel"
-        [ngClass]="{'p-invalid': emailCtrl.invalid && emailCtrl.touched}"
-        class="w-full px-3 py-2 border border-gray-600 rounded"
-    />
-    <small *ngIf="emailCtrl.invalid && emailCtrl.touched" class="p-error text-red-500">
-        Valid email is required.
-    </small>
-    </div>
+    <form #form="ngForm" (ngSubmit)="onSubmit(form)" novalidate class="w-full max-w-sm">
+        <div class="p-field mb-4">
+        <label for="email" class="block text-sm font-medium text-white mb-1">
+            {{ 'Email' | localize }}
+        </label>
+        <input
+            id="email"
+            name="email"
+            type="email"
+            pInputText
+            required
+            [(ngModel)]="model.email"
+            #emailCtrl="ngModel"
+            [ngClass]="{'p-invalid': emailCtrl.invalid && emailCtrl.touched}"
+            class="w-full px-3 py-2 border border-gray-600 rounded bg-gray-800 text-white"
+        />
+        <small *ngIf="emailCtrl.invalid && emailCtrl.touched" class="p-error text-red-500">
+            {{ 'ValidEmailRequired' | localize }}
+        </small>
+        </div>
 
-    <div class="p-field mb-6">
-    <label for="password" class="block text-sm font-medium text-white mb-1">Password</label>
-    <p-password
-        id="password"
-        name="password"
-        feedback="false"
-        toggleMask="true"
-        required
-        [(ngModel)]="model.password"
-        #pwdCtrl="ngModel"
-        [ngClass]="{'p-invalid': pwdCtrl.invalid && pwdCtrl.touched}"
-        styleClass="w-full"
-        inputStyleClass="w-full px-3 py-2 border border-gray-600 rounded"
-    ></p-password>
-    <small *ngIf="pwdCtrl.invalid && pwdCtrl.touched" class="p-error text-red-500">
-        Password is required.
-    </small>
-    </div>
+        <div class="p-field mb-6">
+        <label for="password" class="block text-sm font-medium text-white mb-1">
+            {{ 'Password' | localize }}
+        </label>
+        <p-password
+            id="password"
+            name="password"
+            feedback="false"
+            toggleMask="true"
+            required
+            [(ngModel)]="model.password"
+            #pwdCtrl="ngModel"
+            [ngClass]="{'p-invalid': pwdCtrl.invalid && pwdCtrl.touched}"
+            styleClass="w-full"
+            inputStyleClass="w-full px-3 py-2 border border-gray-600 rounded bg-gray-800 text-white"
+        ></p-password>
+        <small *ngIf="pwdCtrl.invalid && pwdCtrl.touched" class="p-error text-red-500">
+            {{ 'PasswordRequired' | localize }}
+        </small>
+        </div>
 
-    <button
+        <div class="flex items-center mb-6">
+        <input
+            id="rememberMe"
+            type="checkbox"
+            class="mr-2"
+            [(ngModel)]="model.rememberMe"
+            name="rememberMe"
+        />
+        <label for="rememberMe" class="text-gray-300 text-sm">
+            {{ 'RememberMe' | localize }}
+        </label>
+        </div>
+
+        <button
         pButton
         type="submit"
-        label="Login"
+        [label]="'Login' | localize"
         [disabled]="form.invalid || loading"
         [loading]="loading"
-        class="w-full"
-    ></button>
+        class="w-full mb-4"
+        ></button>
 
-    <p-message
+        <p-message
         *ngIf="error"
         severity="error"
-        text="{{ error }}"
-        class="mt-4 text-white"
-    ></p-message>
-</form>
+        [text]="error"
+        class="mt-2 text-white"
+        ></p-message>
+    </form>
+
+    <p class="text-gray-400 text-sm">
+        {{ 'NoAccount' | localize }}
+        <a routerLink="/register" class="text-blue-400 hover:underline ml-1">
+        {{ 'Register' | localize }}
+        </a>
+    </p>
 </div>
