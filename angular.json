@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "AltMed.Client": {
+    "AltWirePoint.Client": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/alt-med.client",
+            "outputPath": "dist/alt-wire-point.client",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -64,10 +64,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "AltMed.Client:build:production"
+              "buildTarget": "AltWirePoint.Client:build:production"
             },
             "development": {
-              "buildTarget": "AltMed.Client:build:development"
+              "buildTarget": "AltWirePoint.Client:build:development"
             }
           },
           "defaultConfiguration": "development"

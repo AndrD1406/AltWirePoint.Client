@@ -37,11 +37,11 @@ import { CommonModule } from '@angular/common';
 })
 export class AppComponent extends AppComponentBase implements OnInit {
     // load from localStorage or default to 'en'
-    currentLang = localStorage.getItem('currentLang') || 'en';
+    currentLanguage = localStorage.getItem('currentLanguage') || 'en';
 
     languages = [
         { code: 'en', label: 'English' },
-        { code: 'ua', label: 'Українська' },
+        { code: 'uk', label: 'Українська' },
     ];
 
     sideItems: MenuItem[]     = [];
@@ -62,7 +62,7 @@ export class AppComponent extends AppComponentBase implements OnInit {
     ngOnInit(): void {
         const myId = this.authService.getUserIdFromToken();
 
-        this.loc.loadTranslations(this.currentLang)
+        this.loc.loadTranslations(this.currentLanguage)
             .subscribe(() => this.buildMenus());
 
         if (myId) {
@@ -74,10 +74,10 @@ export class AppComponent extends AppComponentBase implements OnInit {
         }
     }
 
-    switchLanguage(lang: string): void {
-        this.currentLang = lang;
-        localStorage.setItem('currentLang', lang);
-        this.loc.loadTranslations(lang)
+    switchLanguage(language: string): void {
+        this.currentLanguage = language;
+        localStorage.setItem('currentLanguage', language);
+        this.loc.loadTranslations(language)
             .subscribe(() => this.buildMenus());
     }
 

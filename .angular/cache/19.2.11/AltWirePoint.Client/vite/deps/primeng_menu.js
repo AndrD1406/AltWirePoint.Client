@@ -5,7 +5,6 @@ import {
 import {
   zindexutils
 } from "./chunk-6222G4ZR.js";
-import "./chunk-UC7GKZXU.js";
 import {
   Badge,
   BadgeModule
@@ -13,6 +12,7 @@ import {
 import {
   ConnectedOverlayScrollHandler
 } from "./chunk-5G7WYC4N.js";
+import "./chunk-UC7GKZXU.js";
 import {
   Ripple
 } from "./chunk-L2OY4W2W.js";
@@ -22,19 +22,6 @@ import {
 import {
   BaseStyle
 } from "./chunk-PPOQGAMT.js";
-import {
-  OverlayService,
-  PrimeTemplate,
-  SharedModule,
-  absolutePosition,
-  appendChild,
-  find,
-  findSingle,
-  focus,
-  isTouchDevice,
-  relativePosition,
-  uuid
-} from "./chunk-47JVB4WY.js";
 import {
   RouterLink,
   RouterLinkActive,
@@ -51,6 +38,19 @@ import {
   trigger
 } from "./chunk-FGAPHBZR.js";
 import "./chunk-7ZLDRHSH.js";
+import {
+  OverlayService,
+  PrimeTemplate,
+  SharedModule,
+  absolutePosition,
+  appendChild,
+  find,
+  findSingle,
+  focus,
+  isTouchDevice,
+  relativePosition,
+  uuid
+} from "./chunk-47JVB4WY.js";
 import {
   CommonModule,
   NgClass,

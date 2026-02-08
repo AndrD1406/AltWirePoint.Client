@@ -49,7 +49,7 @@
     <string key="FailedToLoadComments">Не вдалося завантажити коментарі</string>
     <string key="CommentImage">Зображення коментаря</string>
     <string key="PublicationDetails">Деталі публікації</string>
-    <string key="AltMed">AltMed</string>
+    <string key="AltWirePoint">AltWirePoint</string>
     <string key="AlternativeMediaPlatform">Платформа для альтернативних медіа</string>
     <string key="Login">Увійти</string>
     <string key="Email">Email</string>

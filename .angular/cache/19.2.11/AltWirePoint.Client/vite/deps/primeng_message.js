@@ -1,10 +1,10 @@
 import "./chunk-UC7GKZXU.js";
 import {
-  Ripple
-} from "./chunk-L2OY4W2W.js";
-import {
   TimesIcon
 } from "./chunk-6HDJJMQM.js";
+import {
+  Ripple
+} from "./chunk-L2OY4W2W.js";
 import {
   BaseComponent
 } from "./chunk-JDYUWO2I.js";
@@ -12,15 +12,15 @@ import {
   BaseStyle
 } from "./chunk-PPOQGAMT.js";
 import {
-  PrimeTemplate,
-  SharedModule
-} from "./chunk-47JVB4WY.js";
-import {
   animate,
   style,
   transition,
   trigger
 } from "./chunk-FGAPHBZR.js";
+import {
+  PrimeTemplate,
+  SharedModule
+} from "./chunk-47JVB4WY.js";
 import {
   CommonModule,
   NgClass,
