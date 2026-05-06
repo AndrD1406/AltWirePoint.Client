@@ -10,6 +10,7 @@ import { AppComponentBase } from '../../app-component-base';
 import { LocalizationService } from '../../services/localization.service';
 import { LocalizePipe } from '../../pipes/localization.pipe';
 import { MessageModule } from 'primeng/message';
+import { isVideoUrl } from '../../api/file-parameter.utils';
 
 @Component({
   selector: 'app-comments',
@@ -58,6 +59,10 @@ export class CommentsComponent extends AppComponentBase implements OnChanges
             this.loading = false;
             }
         });
+    }
+
+    isVideo(url: string): boolean {
+        return isVideoUrl(url);
     }
 
     getAvatarSrc(logo?: string): string {

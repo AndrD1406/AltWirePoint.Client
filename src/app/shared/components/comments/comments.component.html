@@ -32,14 +32,25 @@
             </small>
         </div>
 
-        <p class="text-sm mt-1">{{ c.content }}</p>
+        <p *ngIf="c.content" class="text-sm mt-1">{{ c.content }}</p>
 
-        <img
-            *ngIf="c.image64"
-            [src]="'data:image/png;base64,' + c.image64"
-            [alt]="'CommentImage' | localize"
-            class="mt-2 rounded-lg max-w-full"
-        />
+        <!-- Media: images and videos from fileUrls -->
+        <ng-container *ngIf="c.fileUrls?.length">
+            <ng-container *ngFor="let url of c.fileUrls">
+                <video
+                    *ngIf="isVideo(url)"
+                    [src]="url"
+                    controls
+                    class="mt-2 rounded-lg max-w-full"
+                ></video>
+                <img
+                    *ngIf="!isVideo(url)"
+                    [src]="url"
+                    [alt]="'CommentImage' | localize"
+                    class="mt-2 rounded-lg max-w-full"
+                />
+            </ng-container>
+        </ng-container>
         </div>
     </div>
 </div>

@@ -4,7 +4,7 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { MessageModule } from 'primeng/message';
-import { AccountServiceProxy, EditProfileDto, ProfileDto, PublicationServiceProxy } from '../../api/service-proxies';
+import { AccountServiceProxy, ProfileEditRequest, ProfileDto, PublicationServiceProxy } from '../../api/service-proxies';
 import { LocalizationService } from '../../services/localization.service';
 import { AppComponentBase } from '../../app-component-base';
 import { LocalizePipe } from "../../pipes/localization.pipe";
@@ -25,7 +25,7 @@ import { LocalizePipe } from "../../pipes/localization.pipe";
 export class EditProfileComponent
   extends AppComponentBase
 {
-    @Input() model: EditProfileDto = new EditProfileDto();
+    @Input() model: ProfileEditRequest = new ProfileEditRequest();
     @Output() saved     = new EventEmitter<ProfileDto>();
     @Output() cancelled = new EventEmitter<void>();
 

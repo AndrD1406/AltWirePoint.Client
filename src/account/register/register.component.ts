@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { NgForm, FormsModule }   from '@angular/forms';
-import { AccountServiceProxy, RegisterDto } from '../../app/shared/api/service-proxies';
+import { AccountServiceProxy, RegisterRequest } from '../../app/shared/api/service-proxies';
 import { InputTextModule }       from 'primeng/inputtext';
 import { PasswordModule }        from 'primeng/password';
 import { ButtonModule }          from 'primeng/button';
@@ -50,7 +50,7 @@ export class RegisterComponent {
         this.loading = true;
         this.error = undefined;
     
-        const dto = new RegisterDto();
+        const dto = new RegisterRequest();
         dto.userName        = this.model.userName;
         dto.email           = this.model.email;
         dto.phoneNumber     = this.model.phoneNumber;

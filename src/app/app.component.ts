@@ -10,7 +10,7 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { CreateOrEditPublicationComponent } from './shared/components/create-or-edit-publication/create-or-edit-publication.component';
 import { AuthService } from './shared/api/auth.service';
-import { ProfileDto, PublicationDto, PublicationServiceProxy } from './shared/api/service-proxies';
+import { ProfileDto, Publication, PublicationServiceProxy } from './shared/api/service-proxies';
 import { LocalizePipe } from "./shared/pipes/localization.pipe";
 import { AppComponentBase } from './shared/app-component-base';
 import { LocalizationService } from './shared/services/localization.service';
@@ -110,7 +110,7 @@ export class AppComponent extends AppComponentBase implements OnInit {
         this.displayPostModal = true;
     }
 
-    onPostSaved(pub: PublicationDto): void {
+    onPostSaved(pub: Publication): void {
         this.displayPostModal = false;
         // … additional handling if needed …
     }

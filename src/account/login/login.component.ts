@@ -7,7 +7,7 @@ import { PasswordModule }          from 'primeng/password';
 import { ButtonModule }            from 'primeng/button';
 import { MessageModule }           from 'primeng/message';
 import { CookieService }           from 'ngx-cookie-service';
-import { AccountServiceProxy, LoginDto, AuthenticationResponse } from '../../app/shared/api/service-proxies';
+import { AccountServiceProxy, LoginRequest, AuthenticationResponse } from '../../app/shared/api/service-proxies';
 import { AuthService } from '../../app/shared/api/auth.service';
 import { LocalizePipe } from "../../app/shared/pipes/localization.pipe";
 
@@ -47,7 +47,7 @@ export class LoginComponent {
         this.loading = true;
         this.error = undefined;
 
-        const dto = new LoginDto();
+        const dto = new LoginRequest();
         dto.email    = this.model.email;
         dto.password = this.model.password;
 

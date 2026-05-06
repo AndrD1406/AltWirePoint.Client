@@ -6,11 +6,11 @@ import {
   BadgeModule
 } from "./chunk-UI6O4EZ5.js";
 import {
-  SpinnerIcon
-} from "./chunk-6HDJJMQM.js";
-import {
   Ripple
 } from "./chunk-L2OY4W2W.js";
+import {
+  SpinnerIcon
+} from "./chunk-6HDJJMQM.js";
 import {
   BaseComponent
 } from "./chunk-JDYUWO2I.js";
@@ -1982,4 +1982,4 @@ export {
   Button,
   ButtonModule
 };
-//# sourceMappingURL=chunk-WK4R6P6K.js.map
+//# sourceMappingURL=chunk-6XEX6MZ7.js.map

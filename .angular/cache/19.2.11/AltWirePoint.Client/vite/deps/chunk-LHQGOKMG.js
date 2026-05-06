@@ -1,31 +1,23 @@
 import {
-  zindexutils
-} from "./chunk-6222G4ZR.js";
-import {
   Button
-} from "./chunk-WK4R6P6K.js";
-import {
-  DomHandler
-} from "./chunk-5G7WYC4N.js";
+} from "./chunk-6XEX6MZ7.js";
 import {
   TimesIcon,
   WindowMaximizeIcon,
   WindowMinimizeIcon
 } from "./chunk-6HDJJMQM.js";
 import {
+  zindexutils
+} from "./chunk-6222G4ZR.js";
+import {
+  DomHandler
+} from "./chunk-5G7WYC4N.js";
+import {
   BaseComponent
 } from "./chunk-JDYUWO2I.js";
 import {
   BaseStyle
 } from "./chunk-PPOQGAMT.js";
-import {
-  animate,
-  animation,
-  style,
-  transition,
-  trigger,
-  useAnimation
-} from "./chunk-FGAPHBZR.js";
 import {
   PrimeTemplate,
   SharedModule,
@@ -46,6 +38,14 @@ import {
   unblockBodyScroll,
   uuid
 } from "./chunk-47JVB4WY.js";
+import {
+  animate,
+  animation,
+  style,
+  transition,
+  trigger,
+  useAnimation
+} from "./chunk-FGAPHBZR.js";
 import {
   CommonModule,
   NgClass,
@@ -2272,4 +2272,4 @@ export {
   Dialog,
   DialogModule
 };
-//# sourceMappingURL=chunk-WUHQDZXN.js.map
+//# sourceMappingURL=chunk-LHQGOKMG.js.map

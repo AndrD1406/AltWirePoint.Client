@@ -8,46 +8,57 @@
         <textarea
         id="content"
         name="content"
-        [required]="!model.image64"
+        [required]="previews.length === 0"
         rows="8"
         maxlength="250"
         [placeholder]="'WhatsHappening' | localize"
-        [(ngModel)]="model.content"
+        [(ngModel)]="description"
         #contentCtrl="ngModel"
         (paste)="onPaste($event)"
         class="w-full p-4 text-base resize-y border border-gray-300 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none"
         ></textarea>
         <div class="mt-1 text-sm text-gray-500 text-right">
-        {{ model.content?.length || 0 }} / 250
+        {{ description.length || 0 }} / 250
         </div>
         <small
-        *ngIf="contentCtrl.invalid && contentCtrl.touched && !model.image64"
+        *ngIf="contentCtrl.invalid && contentCtrl.touched && previews.length === 0"
         class="block mt-1 text-red-500"
         >
         {{ 'ContentIsRequired' | localize }}
         </small>
     </div>
 
-    <div *ngIf="previewUrl" class="w-full">
-        <img
-        [src]="previewUrl"
-        [alt]="'Preview' | localize"
-        class="w-full rounded-lg mb-2 border border-gray-600"
-        />
-        <button
-        type="button"
-        pButton
-        icon="pi pi-trash"
-        class="inline-flex items-center justify-center p-2 bg-red-600 hover:bg-red-700 text-white rounded-full"
-        (click)="clearImage()"
-        ></button>
+    <!-- File previews -->
+    <div *ngIf="previews.length > 0" class="w-full space-y-3">
+        <div *ngFor="let preview of previews; let i = index" class="relative">
+            <img
+            *ngIf="!preview.isVideo"
+            [src]="preview.url"
+            [alt]="'Preview' | localize"
+            class="w-full rounded-lg border border-gray-600"
+            />
+            <video
+            *ngIf="preview.isVideo"
+            [src]="preview.url"
+            controls
+            class="w-full rounded-lg border border-gray-600"
+            ></video>
+            <button
+            type="button"
+            pButton
+            icon="pi pi-times"
+            class="absolute top-2 right-2 p-2 bg-red-600 hover:bg-red-700 text-white rounded-full"
+            (click)="removeFile(i)"
+            ></button>
+        </div>
     </div>
 
     <div class="w-full text-center">
         <input
         #fileInput
         type="file"
-        accept="image/*"
+        accept="image/*,video/*"
+        multiple
         (change)="onFileChange($event)"
         hidden
         />
@@ -57,8 +68,12 @@
         icon="pi pi-upload"
         [label]="'ChooseImage' | localize"
         (click)="fileInput.click()"
+        [disabled]="previews.length >= 5"
         class="w-full inline-flex items-center justify-center px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-md"
         ></button>
+        <div *ngIf="previews.length > 0" class="mt-1 text-sm text-gray-400">
+            {{ previews.length }} / 5
+        </div>
     </div>
 
     <p-message
@@ -80,7 +95,7 @@
         pButton
         type="submit"
         [label]="'Save' | localize"
-        [disabled]="loading || (!model.content?.trim() && !model.image64)"
+        [disabled]="loading || (!description.trim() && previews.length === 0)"
         [loading]="loading"
         class="bg-green-600 hover:bg-green-700 text-white"
         ></button>

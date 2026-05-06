@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Input, OnInit, SimpleChanges, ViewChild } from '@angular/core';
-import { CommentCreateDto, CommentDto, PublicationDto, PublicationServiceProxy } from '../../api/service-proxies';
+import { ChangeDetectorRef, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { CommentDto, LikeDto, PublicationDto, PublicationServiceProxy, FileParameter } from '../../api/service-proxies';
 import { PublicationComponent } from "../publication/publication.component";
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
@@ -7,10 +7,16 @@ import { MessageModule } from 'primeng/message';
 import { FormsModule, NgForm } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
 import { AuthService } from '../../api/auth.service';
-import { fromEvent, map, throttleTime } from 'rxjs';
 import { LocalizePipe } from "../../pipes/localization.pipe";
 import { LocalizationService } from '../../services/localization.service';
 import { AppComponentBase } from '../../app-component-base';
+import { isVideoFile } from '../../api/file-parameter.utils';
+
+interface FilePreview {
+    url: string;
+    file: File;
+    isVideo: boolean;
+}
 
 @Component({
     selector: 'publications-container',
@@ -50,10 +56,14 @@ export class PublicationsContainerComponent extends AppComponentBase implements 
     allLoaded = false;
 
     showCommentDialog = false;
-    commentModel = new CommentCreateDto();
-    previewUrl: string | ArrayBuffer | null = null;
+    commentPublicationId = '';
+    commentAuthorId = '';
+    commentContent = '';
+    commentPreviews: FilePreview[] = [];
     commentError?: string;
     commentLoading = false;
+
+    private readonly maxFiles = 5;
 
     constructor(
         private publicationService: PublicationServiceProxy,
@@ -116,18 +126,18 @@ export class PublicationsContainerComponent extends AppComponentBase implements 
                   currentSkip,
                   this.take
               )
-            : this.publicationService.getWithDetailsPaged(
+            : this.publicationService.get(
                   currentSkip,
                   this.take
               );
 
         page$.subscribe({
-            next: batch => {
+            next: (batch: PublicationDto[]) => {
                 const unique = batch.filter(
-                    p => !this.publications.some(x => x.id === p.id)
+                    (p: PublicationDto) => !this.publications.some(x => x.id === p.id)
                 );
                 unique.forEach(
-                    p => (p.likes = (p.likes || []).filter(l => l.isLiked))
+                    (p: PublicationDto) => (p.likes = (p.likes || []).filter((l: LikeDto) => l.isLiked))
                 );
 
                 this.publications = [...this.publications, ...unique];
@@ -135,7 +145,7 @@ export class PublicationsContainerComponent extends AppComponentBase implements 
                 this.allLoaded = batch.length < this.take;
                 this.cd.markForCheck();
             },
-            error: err => {
+            error: (err: any) => {
                 this.loading = false;
                 this.allLoaded = true;
                 this.commentError =
@@ -157,11 +167,10 @@ export class PublicationsContainerComponent extends AppComponentBase implements 
     }
 
     handleComment(pubId: string) {
-        this.commentModel = new CommentCreateDto();
-        this.commentModel.publicationId = pubId;
-        this.commentModel.authorId =
-            this.authService.getUserIdFromToken()!;
-        this.previewUrl = null;
+        this.commentPublicationId = pubId;
+        this.commentAuthorId = this.authService.getUserIdFromToken()!;
+        this.commentContent = '';
+        this.clearCommentFiles();
         this.showCommentDialog = true;
     }
 
@@ -169,10 +178,10 @@ export class PublicationsContainerComponent extends AppComponentBase implements 
         const items = event.clipboardData?.items;
         if (!items) return;
         for (const item of Array.from(items)) {
-            if (item.type.startsWith('image/')) {
+            if (item.type.startsWith('image/') || item.type.startsWith('video/')) {
                 const file = item.getAsFile();
                 if (file) {
-                    this.loadFile(file);
+                    this.addCommentFile(file);
                     event.preventDefault();
                 }
                 break;
@@ -183,22 +192,32 @@ export class PublicationsContainerComponent extends AppComponentBase implements 
     onFileChange(ev: Event) {
         const input = ev.target as HTMLInputElement;
         if (!input.files?.length) return;
-        this.loadFile(input.files[0]);
+        for (const file of Array.from(input.files)) {
+            this.addCommentFile(file);
+        }
+        input.value = '';
     }
 
-    private loadFile(file: File) {
-        const reader = new FileReader();
-        reader.onload = () => {
-            this.previewUrl = reader.result;
-            const dataUrl = reader.result as string;
-            this.commentModel.image64 = dataUrl.split(',')[1];
-        };
-        reader.readAsDataURL(file);
+    private addCommentFile(file: File) {
+        if (this.commentPreviews.length >= this.maxFiles) return;
+        const url = URL.createObjectURL(file);
+        this.commentPreviews.push({
+            url,
+            file,
+            isVideo: isVideoFile(file)
+        });
     }
 
-    clearImage() {
-        this.previewUrl = null;
-        this.commentModel.image64 = undefined;
+    removeCommentFile(index: number) {
+        const removed = this.commentPreviews.splice(index, 1);
+        if (removed.length) {
+            URL.revokeObjectURL(removed[0].url);
+        }
+    }
+
+    clearCommentFiles() {
+        this.commentPreviews.forEach(p => URL.revokeObjectURL(p.url));
+        this.commentPreviews = [];
     }
 
     submitComment(form: NgForm) {
@@ -206,7 +225,17 @@ export class PublicationsContainerComponent extends AppComponentBase implements 
         this.commentLoading = true;
         this.commentError = undefined;
 
-        this.publicationService.comment(this.commentModel).subscribe({
+        const fileParams: FileParameter[] = this.commentPreviews.map(p => ({
+            data: p.file,
+            fileName: p.file.name
+        }));
+
+        this.publicationService.comment(
+            this.commentPublicationId,
+            this.commentAuthorId,
+            this.commentContent,
+            fileParams
+        ).subscribe({
             next: (newComment: CommentDto) => {
                 this.commentLoading = false;
                 const parent = this.publications.find(
@@ -216,6 +245,7 @@ export class PublicationsContainerComponent extends AppComponentBase implements 
                     parent.comments = parent.comments || [];
                     parent.comments.push(newComment);
                 }
+                this.clearCommentFiles();
                 this.showCommentDialog = false;
             },
             error: err => {
@@ -227,15 +257,7 @@ export class PublicationsContainerComponent extends AppComponentBase implements 
     }
 
     cancelComment() {
+        this.clearCommentFiles();
         this.showCommentDialog = false;
-    }
-
-    getImageSrc(image: string | ArrayBuffer | null | undefined): string {
-        if (!image) return '';
-        const str = image.toString();
-        if (str.startsWith('data:') || str.startsWith('http')) {
-            return str;
-        }
-        return `data:image/png;base64,${str}`;
     }
 }
