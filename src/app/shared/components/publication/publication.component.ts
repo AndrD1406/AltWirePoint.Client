@@ -1,24 +1,22 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { PublicationCreateDto, PublicationDto, PublicationServiceProxy } from '../../api/service-proxies';
+import { PublicationDto, PublicationServiceProxy } from '../../api/service-proxies';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { LocalizePipe } from "../../pipes/localization.pipe";
 import { ConfirmationService, MenuItem } from 'primeng/api';
 import { LocalizationService } from '../../services/localization.service';
 import { AppComponentBase } from '../../app-component-base';
-import { DialogModule } from 'primeng/dialog';
-import { CreateOrEditPublicationComponent } from '../create-or-edit-publication/create-or-edit-publication.component';
 import { MenuModule } from 'primeng/menu';
-import { PanelMenuModule } from 'primeng/panelmenu';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ButtonModule } from 'primeng/button';
 import { AuthService } from '../../api/auth.service';
+import { isVideoUrl } from '../../api/file-parameter.utils';
 
 @Component({
     selector: 'app-publication',
     standalone: true,
-    imports: [CommonModule, RouterModule, LocalizePipe, DialogModule, CreateOrEditPublicationComponent,
-         MenuModule, PanelMenuModule, ConfirmDialogModule, ButtonModule],
+    imports: [CommonModule, RouterModule, LocalizePipe,
+         MenuModule, ConfirmDialogModule, ButtonModule],
     providers: [ConfirmationService],
     templateUrl: './publication.component.html',
     styleUrl: './publication.component.css'
@@ -33,8 +31,6 @@ export class PublicationComponent extends AppComponentBase implements OnInit {
     defaultLogo = '/assets/default-logo.png';
 
     menuItems: MenuItem[] = [];
-    showEditDialog = false;
-    updateModel = new PublicationCreateDto();
     isOwn = false;
 
     constructor(
@@ -51,14 +47,10 @@ export class PublicationComponent extends AppComponentBase implements OnInit {
         const myId = this.authService.getUserIdFromToken();
         this.isOwn = myId === this.publication.authorId;
 
-        // only show edit/delete menu when it's your own post
+        // only show delete menu when it's your own post
+        // TODO: re-add edit once an update API endpoint exists
         if (this.isOwn) {
         this.menuItems = [
-            {
-            label: this.t('EditPublication'),
-            icon: 'pi pi-pencil',
-            command: () => this.openEdit()
-            },
             {
             label: this.t('Delete'),
             icon: 'pi pi-trash',
@@ -80,20 +72,8 @@ export class PublicationComponent extends AppComponentBase implements OnInit {
         this.comment.emit(this.publication.id!);
     }
 
-    openEdit() {
-        this.updateModel.content = this.publication.content || '';
-        this.updateModel.image64  = this.publication.image64 || '';
-        this.showEditDialog       = true;
-    }
-
-    onSaveEdited(dto: PublicationCreateDto) {
-        this.publicationService.update(this.publication.id, dto)
-        .subscribe(resultArray => {
-            const updated = resultArray[0];
-            this.publication.content = updated.content;
-            this.publication.image64 = updated.image64;
-            this.showEditDialog = false;
-        });
+    isVideo(url: string): boolean {
+        return isVideoUrl(url);
     }
 
     confirmDelete() {

@@ -41,11 +41,11 @@
     >
         <div>
         <textarea
-            id="content"
-            name="content"
+            id="commentContent"
+            name="commentContent"
             required
             rows="4"
-            [(ngModel)]="commentModel.content"
+            [(ngModel)]="commentContent"
             #contentCtrl="ngModel"
             [placeholder]="'WriteAComment' | localize"
             class="w-full p-2 border border-gray-300 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none resize-y"
@@ -55,26 +55,37 @@
         </small>
         </div>
 
-        <div *ngIf="previewUrl" class="relative">
-        <img
-            [src]="getImageSrc(previewUrl)"
-            [alt]="'Preview' | localize"
-            class="w-full rounded-lg mb-2 border border-gray-600"
-        />
-        <button
-            type="button"
-            pButton
-            icon="pi pi-trash"
-            class="absolute top-2 right-2 p-2 bg-red-600 hover:bg-red-700 text-white rounded-full"
-            (click)="clearImage()"
-        ></button>
+        <!-- File previews -->
+        <div *ngIf="commentPreviews.length > 0" class="space-y-2">
+            <div *ngFor="let preview of commentPreviews; let i = index" class="relative">
+                <img
+                    *ngIf="!preview.isVideo"
+                    [src]="preview.url"
+                    [alt]="'Preview' | localize"
+                    class="w-full rounded-lg border border-gray-600"
+                />
+                <video
+                    *ngIf="preview.isVideo"
+                    [src]="preview.url"
+                    controls
+                    class="w-full rounded-lg border border-gray-600"
+                ></video>
+                <button
+                    type="button"
+                    pButton
+                    icon="pi pi-times"
+                    class="absolute top-2 right-2 p-2 bg-red-600 hover:bg-red-700 text-white rounded-full"
+                    (click)="removeCommentFile(i)"
+                ></button>
+            </div>
         </div>
 
-        <div *ngIf="!previewUrl" class="text-center space-y-2">
+        <div class="text-center space-y-2">
         <input
             #fileInput
             type="file"
-            accept="image/*"
+            accept="image/*,video/*"
+            multiple
             (change)="onFileChange($event)"
             hidden
         />
@@ -84,10 +95,14 @@
             icon="pi pi-upload"
             label="{{ 'AttachImage' | localize }}"
             (click)="fileInput.click()"
+            [disabled]="commentPreviews.length >= 5"
             class="inline-flex items-center justify-center px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-md"
         ></button>
         <div class="text-sm text-gray-400">
             {{ 'OrPasteAnImage' | localize }}
+        </div>
+        <div *ngIf="commentPreviews.length > 0" class="text-sm text-gray-400">
+            {{ commentPreviews.length }} / 5
         </div>
         </div>
 

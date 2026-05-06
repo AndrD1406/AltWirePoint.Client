@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { AccountServiceProxy, EditProfileDto, ProfileDto, PublicationDto, PublicationServiceProxy } from '../../shared/api/service-proxies';
+import { AccountServiceProxy, ProfileEditRequest, ProfileDto, PublicationDto, PublicationServiceProxy } from '../../shared/api/service-proxies';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../shared/api/auth.service';
 import { Dialog } from 'primeng/dialog';
@@ -21,7 +21,7 @@ export class ProfileComponent implements OnInit {
     isOwnProfile = false;
 
     showEditDialog = false;
-    editModel = new EditProfileDto();
+    editModel = new ProfileEditRequest();
     loading = false;
     error?: string;
 
@@ -42,7 +42,7 @@ export class ProfileComponent implements OnInit {
         this.publicationService.getUserById(id)
         .subscribe(dto => {
             this.profile = dto;
-            this.editModel = new EditProfileDto();
+            this.editModel = new ProfileEditRequest();
             this.editModel.name = dto.name;
             this.editModel.logo = dto.logo;
         });
@@ -56,7 +56,7 @@ export class ProfileComponent implements OnInit {
 
     openEditDialog() {
         if (!this.profile) return;
-        this.editModel = new EditProfileDto();
+        this.editModel = new ProfileEditRequest();
         this.editModel.name = this.profile.name;
         this.editModel.logo = this.profile.logo;
         this.showEditDialog = true;

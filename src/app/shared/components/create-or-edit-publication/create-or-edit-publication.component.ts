@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { IPublicationCreateDto, Publication, PublicationCreateDto, PublicationServiceProxy } from '../../api/service-proxies';
+import { Component, EventEmitter, Output } from '@angular/core';
+import { Publication, PublicationServiceProxy, FileParameter } from '../../api/service-proxies';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
@@ -7,6 +7,13 @@ import { CommonModule } from '@angular/common';
 import { LocalizationService } from '../../services/localization.service';
 import { AppComponentBase } from '../../app-component-base';
 import { LocalizePipe } from "../../pipes/localization.pipe";
+import { isVideoFile } from '../../api/file-parameter.utils';
+
+interface FilePreview {
+    url: string;
+    file: File;
+    isVideo: boolean;
+}
 
 @Component({
     selector: 'app-create-or-edit-publication',
@@ -19,10 +26,13 @@ export class CreateOrEditPublicationComponent extends AppComponentBase
     @Output() saved = new EventEmitter<Publication>();
     @Output() cancelled = new EventEmitter<void>();
 
-    @Input() model: PublicationCreateDto = new PublicationCreateDto();
-    previewUrl: string | ArrayBuffer | null = null;
+    description: string = '';
+    previews: FilePreview[] = [];
+
     loading = false;
     error?: string;
+
+    private readonly maxFiles = 5;
 
     constructor(
         private publicationService: PublicationServiceProxy,
@@ -34,34 +44,47 @@ export class CreateOrEditPublicationComponent extends AppComponentBase
     onFileChange(event: Event) {
         const input = event.target as HTMLInputElement;
         if (!input.files?.length) return;
-        this.loadFile(input.files[0]);
+        for (const file of Array.from(input.files)) {
+            this.addFile(file);
+        }
+        input.value = '';
     }
 
     onPaste(event: ClipboardEvent) {
         const items = event.clipboardData?.items;
         if (!items) return;
         for (let item of Array.from(items)) {
-        if (item.type.startsWith('image/')) {
-            const file = item.getAsFile();
-            if (file) this.loadFile(file);
-            event.preventDefault();
-            break;
-        }
+            if (item.type.startsWith('image/') || item.type.startsWith('video/')) {
+                const file = item.getAsFile();
+                if (file) {
+                    this.addFile(file);
+                    event.preventDefault();
+                }
+                break;
+            }
         }
     }
 
-    private loadFile(file: File) {
-        const reader = new FileReader();
-        reader.onload = () => {
-        this.previewUrl = reader.result;
-        this.model.image64 = (reader.result as string).split(',')[1];
-        };
-        reader.readAsDataURL(file);
+    private addFile(file: File) {
+        if (this.previews.length >= this.maxFiles) return;
+        const url = URL.createObjectURL(file);
+        this.previews.push({
+            url,
+            file,
+            isVideo: isVideoFile(file)
+        });
     }
 
-    clearImage() {
-        this.previewUrl = null;
-        this.model.image64 = '';
+    removeFile(index: number) {
+        const removed = this.previews.splice(index, 1);
+        if (removed.length) {
+            URL.revokeObjectURL(removed[0].url);
+        }
+    }
+
+    clearAllFiles() {
+        this.previews.forEach(p => URL.revokeObjectURL(p.url));
+        this.previews = [];
     }
 
     onSubmit(form: NgForm) {
@@ -69,24 +92,28 @@ export class CreateOrEditPublicationComponent extends AppComponentBase
         this.loading = true;
         this.error = undefined;
 
-        const dto = new PublicationCreateDto();
-        dto.content = this.model.content;
-        dto.image64 = this.model.image64;
+        const fileParams: FileParameter[] = this.previews.map(p => ({
+            data: p.file,
+            fileName: p.file.name
+        }));
 
-        this.publicationService.create(dto).subscribe({
-        next: pub => {
-            this.loading = false;
-            this.saved.emit(pub);
-        },
-        error: err => {
-            this.loading = false;
-            this.error =
-            err.error?.detail || this.t('CreationFailed');
-        }
+        this.publicationService.create(this.description, fileParams).subscribe({
+            next: pub => {
+                this.loading = false;
+                this.clearAllFiles();
+                this.description = '';
+                this.saved.emit(pub);
+            },
+            error: err => {
+                this.loading = false;
+                this.error =
+                    err.error?.detail || this.t('CreationFailed');
+            }
         });
     }
 
     onCancel() {
+        this.clearAllFiles();
         this.cancelled.emit();
     }
 }

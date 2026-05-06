@@ -5,7 +5,7 @@
   class="shadow rounded-2xl p-4 flex flex-col gap-3 cursor-pointer hover:bg-gray-800/10"
   (click)="onView()"
 >
-    <!-- HEADER: avatar + name + edit/delete menu -->
+    <!-- HEADER: avatar + name + delete menu -->
     <div class="flex items-center justify-between" (click)="$event.stopPropagation()">
         <a
         [routerLink]="['/profile', publication.authorId]"
@@ -41,16 +41,26 @@
     </div>
 
     <!-- BODY -->
-    <div class="text-sm leading-relaxed">
-        {{ publication.content }}
+    <div *ngIf="publication.description" class="text-sm leading-relaxed">
+        {{ publication.description }}
     </div>
 
-    <div *ngIf="publication.image64" class="mt-2">
-        <img
-        class="w-full rounded-lg"
-        [src]="'data:image/png;base64,' + publication.image64"
-        [alt]="'PublicationImage' | localize"
-        />
+    <!-- MEDIA: images and videos from fileUrls -->
+    <div *ngIf="publication.fileUrls?.length" class="mt-2 space-y-2" (click)="$event.stopPropagation()">
+        <ng-container *ngFor="let url of publication.fileUrls">
+            <video
+            *ngIf="isVideo(url)"
+            [src]="url"
+            controls
+            class="w-full rounded-lg"
+            ></video>
+            <img
+            *ngIf="!isVideo(url)"
+            [src]="url"
+            [alt]="'PublicationImage' | localize"
+            class="w-full rounded-lg"
+            />
+        </ng-container>
     </div>
 
     <!-- FOOTER: like & comment -->
@@ -73,18 +83,3 @@
         </button>
     </div>
 </div>
-
-<!-- EDIT DIALOG -->
-<p-dialog
-  header="{{ 'EditPublication' | localize }}"
-  [(visible)]="showEditDialog"
-  [modal]="true"
-  [closable]="false"
-  [style]="{ width: '80vw', maxWidth: '600px' }"
->
-    <app-create-or-edit-publication
-        [model]="updateModel"
-        (saved)="onSaveEdited($event)"
-        (cancelled)="showEditDialog = false"
-    ></app-create-or-edit-publication>
-</p-dialog>
