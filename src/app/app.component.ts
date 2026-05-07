@@ -10,7 +10,7 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { CreateOrEditPublicationComponent } from './shared/components/create-or-edit-publication/create-or-edit-publication.component';
 import { AuthService } from './shared/api/auth.service';
-import { ProfileDto, Publication, PublicationServiceProxy } from './shared/api/service-proxies';
+import { AccountServiceProxy, ProfileDto, Publication, PublicationServiceProxy } from './shared/api/service-proxies';
 import { LocalizePipe } from "./shared/pipes/localization.pipe";
 import { AppComponentBase } from './shared/app-component-base';
 import { LocalizationService } from './shared/services/localization.service';
@@ -47,12 +47,12 @@ export class AppComponent extends AppComponentBase implements OnInit {
     sideItems: MenuItem[]     = [];
     userMenuItems: MenuItem[] = [];
     userName = '';
-    userLogo?: string;
+    userProfilePicture?: string;
     displayPostModal = false;
 
     constructor(
         private authService: AuthService,
-        private publicationService: PublicationServiceProxy,
+        private accountService: AccountServiceProxy,
         private router: Router,
         loc: LocalizationService
     ) {
@@ -66,10 +66,10 @@ export class AppComponent extends AppComponentBase implements OnInit {
             .subscribe(() => this.buildMenus());
 
         if (myId) {
-            this.publicationService.getUserById(myId)
+            this.accountService.getUserById(myId)
                 .subscribe((profile: ProfileDto) => {
                     this.userName = profile.name || '';
-                    this.userLogo = profile.logo;
+                    this.userProfilePicture = profile.profilePictureUrl;
                 });
         }
     }

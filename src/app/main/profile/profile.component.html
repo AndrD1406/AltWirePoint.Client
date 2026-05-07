@@ -5,7 +5,7 @@
         <div class="flex items-center gap-4">
             <img
                 class="w-24 h-24 rounded-full object-cover"
-                [src]="getLogoSrc(profile.logo)"
+                [src]="getLogoSrc(profile.profilePictureUrl)"
                 alt="{{ 'UserLogo' | localize }}"
             />
             <span class="text-2xl font-semibold">{{ profile.name }}</span>
@@ -31,7 +31,9 @@
             (onHide)="showEditDialog = false"
         >
         <edit-profile
-            [model]="editModel"
+            *ngIf="showEditDialog"
+            [name]="profile.name || ''"
+            [initialProfilePictureUrl]="profile.profilePictureUrl"
             (saved)="profile = $event; showEditDialog = false"
             (cancelled)="showEditDialog = false"
         ></edit-profile>

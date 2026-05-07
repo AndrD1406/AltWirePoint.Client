@@ -24,9 +24,9 @@ import { isVideoUrl } from '../../api/file-parameter.utils';
 export class PublicationComponent extends AppComponentBase implements OnInit {
     @Input() publication!: PublicationDto;
     @Output() deleted = new EventEmitter<string>();
-    @Output() like    = new EventEmitter<string>();
+    @Output() like = new EventEmitter<string>();
     @Output() comment = new EventEmitter<string>();
-    @Output() view    = new EventEmitter<string>();
+    @Output() view = new EventEmitter<string>();
 
     defaultLogo = '/assets/default-logo.png';
 

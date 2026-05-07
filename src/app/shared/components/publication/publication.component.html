@@ -1,11 +1,9 @@
 <p-confirmDialog></p-confirmDialog>
 
-<!-- make entire card clickable for detail view -->
 <div
   class="shadow rounded-2xl p-4 flex flex-col gap-3 cursor-pointer hover:bg-gray-800/10"
   (click)="onView()"
 >
-    <!-- HEADER: avatar + name + delete menu -->
     <div class="flex items-center justify-between" (click)="$event.stopPropagation()">
         <a
         [routerLink]="['/profile', publication.authorId]"
@@ -40,12 +38,10 @@
         </ng-container>
     </div>
 
-    <!-- BODY -->
     <div *ngIf="publication.description" class="text-sm leading-relaxed">
         {{ publication.description }}
     </div>
 
-    <!-- MEDIA: images and videos from fileUrls -->
     <div *ngIf="publication.fileUrls?.length" class="mt-2 space-y-2" (click)="$event.stopPropagation()">
         <ng-container *ngFor="let url of publication.fileUrls">
             <video
@@ -63,7 +59,6 @@
         </ng-container>
     </div>
 
-    <!-- FOOTER: like & comment -->
     <div class="flex items-center gap-6 mt-2">
         <button
         type="button"
