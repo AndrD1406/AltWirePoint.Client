@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { MessageModule } from 'primeng/message';
-import { AccountServiceProxy, ProfileEditRequest, ProfileDto, PublicationServiceProxy } from '../../api/service-proxies';
+import { AccountServiceProxy, ProfileDto, FileParameter } from '../../api/service-proxies';
 import { LocalizationService } from '../../services/localization.service';
 import { AppComponentBase } from '../../app-component-base';
 import { LocalizePipe } from "../../pipes/localization.pipe";
@@ -22,14 +22,15 @@ import { LocalizePipe } from "../../pipes/localization.pipe";
 ],
     templateUrl: './edit-profile.component.html'
 })
-export class EditProfileComponent
-  extends AppComponentBase
-{
-    @Input() model: ProfileEditRequest = new ProfileEditRequest();
+export class EditProfileComponent extends AppComponentBase implements OnInit {
+    @Input() name: string = '';
+    @Input() initialProfilePictureUrl?: string;
+
     @Output() saved     = new EventEmitter<ProfileDto>();
     @Output() cancelled = new EventEmitter<void>();
 
-    previewUrl: string | ArrayBuffer | null = null;
+    previewUrl: string | null = null;
+    selectedFile?: File;
     loading = false;
     error?: string;
 
@@ -38,6 +39,10 @@ export class EditProfileComponent
         loc: LocalizationService
     ) {
         super(loc);
+    }
+
+    ngOnInit() {
+        this.previewUrl = this.initialProfilePictureUrl || null;
     }
 
     onFileChange(event: Event) {
@@ -71,11 +76,11 @@ export class EditProfileComponent
             if (img.naturalWidth > maxPx || img.naturalHeight > maxPx) {
             this.error = this.t('ImageTooLarge').replace('{0}', maxPx.toString());
             this.previewUrl = null;
-            this.model.logo = undefined;
+            this.selectedFile = undefined;
             } else {
             this.error = undefined;
             this.previewUrl = dataUrl;
-            this.model.logo = dataUrl.split(',')[1];
+            this.selectedFile = file;
             }
         };
         img.onerror = () => {
@@ -88,7 +93,7 @@ export class EditProfileComponent
 
     clearImage() {
         this.previewUrl = null;
-        this.model.logo = undefined;
+        this.selectedFile = undefined;
     }
 
     onSubmit(form: NgForm) {
@@ -96,7 +101,12 @@ export class EditProfileComponent
         this.loading = true;
         this.error   = undefined;
 
-        this.accountService.editProfile(this.model).subscribe({
+        let fileParam: FileParameter | undefined = undefined;
+        if (this.selectedFile) {
+            fileParam = { data: this.selectedFile, fileName: this.selectedFile.name };
+        }
+
+        this.accountService.editProfile(this.name, fileParam).subscribe({
         next: updated => {
             this.loading = false;
             this.saved.emit(updated);

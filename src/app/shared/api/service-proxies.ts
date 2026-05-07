@@ -32,7 +32,7 @@ export class AccountServiceProxy {
      * @return OK
      */
     register(body: RegisterRequest | undefined): Observable<AuthenticationResponse> {
-        let url_ = this.baseUrl + "/api/Account/register";
+        let url_ = this.baseUrl + "/api/Account/Register";
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = JSON.stringify(body);
@@ -95,11 +95,63 @@ export class AccountServiceProxy {
     }
 
     /**
+     * @param email (optional) 
+     * @return OK
+     */
+    isEmailAlreadyRegistered(email: string | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/Account/IsEmailAlreadyRegistered?";
+        if (email === null)
+            throw new globalThis.Error("The parameter 'email' cannot be null.");
+        else if (email !== undefined)
+            url_ += "email=" + encodeURIComponent("" + email) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processIsEmailAlreadyRegistered(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processIsEmailAlreadyRegistered(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processIsEmailAlreadyRegistered(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
      * @param body (optional) 
      * @return OK
      */
     login(body: LoginRequest | undefined): Observable<AuthenticationResponse> {
-        let url_ = this.baseUrl + "/api/Account/login";
+        let url_ = this.baseUrl + "/api/Account/Login";
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = JSON.stringify(body);
@@ -165,7 +217,7 @@ export class AccountServiceProxy {
      * @return OK
      */
     logout(): Observable<void> {
-        let url_ = this.baseUrl + "/api/Account/logout";
+        let url_ = this.baseUrl + "/api/Account/Logout";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -213,7 +265,7 @@ export class AccountServiceProxy {
      * @return OK
      */
     refresh(body: TokenModel | undefined): Observable<AuthenticationResponse> {
-        let url_ = this.baseUrl + "/api/Account/refresh";
+        let url_ = this.baseUrl + "/api/Account/Refresh";
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = JSON.stringify(body);
@@ -331,21 +383,29 @@ export class AccountServiceProxy {
     }
 
     /**
-     * @param body (optional) 
+     * @param name (optional) 
+     * @param profilePicture (optional) 
      * @return OK
      */
-    editProfile(body: ProfileEditRequest | undefined): Observable<ProfileDto> {
+    editProfile(name: string | undefined, profilePicture: FileParameter | undefined): Observable<ProfileDto> {
         let url_ = this.baseUrl + "/api/Account/EditProfile";
         url_ = url_.replace(/[?&]$/, "");
 
-        const content_ = JSON.stringify(body);
+        const content_ = new FormData();
+        if (name === null || name === undefined)
+            throw new globalThis.Error("The parameter 'name' cannot be null.");
+        else
+            content_.append("Name", name.toString());
+        if (profilePicture === null || profilePicture === undefined)
+            throw new globalThis.Error("The parameter 'profilePicture' cannot be null.");
+        else
+            content_.append("profilePicture", profilePicture.data, profilePicture.fileName ? profilePicture.fileName : "profilePicture");
 
         let options_ : any = {
             body: content_,
             observe: "response",
             responseType: "blob",
             headers: new HttpHeaders({
-                "Content-Type": "application/json",
                 "Accept": "application/json"
             })
         };
@@ -392,55 +452,40 @@ export class AccountServiceProxy {
         }
         return _observableOf(null as any);
     }
-}
-
-@Injectable({
-    providedIn: 'root'
-})
-export class ApiServiceProxy {
-    private http: HttpClient;
-    private baseUrl: string;
-    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
-
-    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
-        this.http = http;
-        this.baseUrl = baseUrl ?? "";
-    }
 
     /**
-     * @param email (optional) 
      * @return OK
      */
-    account(email: string | undefined): Observable<void> {
-        let url_ = this.baseUrl + "/api/Account?";
-        if (email === null)
-            throw new globalThis.Error("The parameter 'email' cannot be null.");
-        else if (email !== undefined)
-            url_ += "email=" + encodeURIComponent("" + email) + "&";
+    getProfilePicture(userId: string): Observable<string> {
+        let url_ = this.baseUrl + "/api/Account/GetProfilePicture/{userId}";
+        if (userId === undefined || userId === null)
+            throw new globalThis.Error("The parameter 'userId' must be defined.");
+        url_ = url_.replace("{userId}", encodeURIComponent("" + userId));
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
             observe: "response",
             responseType: "blob",
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
         return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processAccount(response_);
+            return this.processGetProfilePicture(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processAccount(response_ as any);
+                    return this.processGetProfilePicture(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<string>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<string>;
         }));
     }
 
-    protected processAccount(response: HttpResponseBase): Observable<void> {
+    protected processGetProfilePicture(response: HttpResponseBase): Observable<string> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -449,7 +494,79 @@ export class ApiServiceProxy {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : null as any;
+    
+            return _observableOf(result200);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("Not Found", status, _responseText, _headers, result404);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    getUserById(id: string): Observable<ProfileDto> {
+        let url_ = this.baseUrl + "/api/Account/GetUserById/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetUserById(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetUserById(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<ProfileDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<ProfileDto>;
+        }));
+    }
+
+    protected processGetUserById(response: HttpResponseBase): Observable<ProfileDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = ProfileDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("Not Found", status, _responseText, _headers, result404);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -709,69 +826,6 @@ export class PublicationServiceProxy {
                 result200 = resultData200 !== undefined ? resultData200 : null as any;
     
             return _observableOf(result200);
-            }));
-        } else if (status !== 200 && status !== 204) {
-            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            }));
-        }
-        return _observableOf(null as any);
-    }
-
-    /**
-     * @param id (optional) 
-     * @return OK
-     */
-    getUserById(id: string | undefined): Observable<ProfileDto> {
-        let url_ = this.baseUrl + "/api/Publication/GetUserById?";
-        if (id === null)
-            throw new globalThis.Error("The parameter 'id' cannot be null.");
-        else if (id !== undefined)
-            url_ += "id=" + encodeURIComponent("" + id) + "&";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_ : any = {
-            observe: "response",
-            responseType: "blob",
-            headers: new HttpHeaders({
-                "Accept": "application/json"
-            })
-        };
-
-        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processGetUserById(response_);
-        })).pipe(_observableCatch((response_: any) => {
-            if (response_ instanceof HttpResponseBase) {
-                try {
-                    return this.processGetUserById(response_ as any);
-                } catch (e) {
-                    return _observableThrow(e) as any as Observable<ProfileDto>;
-                }
-            } else
-                return _observableThrow(response_) as any as Observable<ProfileDto>;
-        }));
-    }
-
-    protected processGetUserById(response: HttpResponseBase): Observable<ProfileDto> {
-        const status = response.status;
-        const responseBlob =
-            response instanceof HttpResponse ? response.body :
-            (response as any).error instanceof Blob ? (response as any).error : undefined;
-
-        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
-            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = ProfileDto.fromJS(resultData200);
-            return _observableOf(result200);
-            }));
-        } else if (status === 404) {
-            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            let result404: any = null;
-            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result404 = ProblemDetails.fromJS(resultData404);
-            return throwException("Not Found", status, _responseText, _headers, result404);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -1278,12 +1332,12 @@ export class ApplicationUser implements IApplicationUser {
     accessFailedCount?: number;
     name?: string | undefined;
     role?: string | undefined;
-    logo?: string | undefined;
     description?: string | undefined;
     refreshToken?: string | undefined;
     refreshTokenExpirationDateTime?: string;
     publications?: Publication[] | undefined;
     likes?: Like[] | undefined;
+    profilePicture?: CloudStoredFile;
 
     constructor(data?: IApplicationUser) {
         if (data) {
@@ -1313,7 +1367,6 @@ export class ApplicationUser implements IApplicationUser {
             this.accessFailedCount = _data["accessFailedCount"];
             this.name = _data["name"];
             this.role = _data["role"];
-            this.logo = _data["logo"];
             this.description = _data["description"];
             this.refreshToken = _data["refreshToken"];
             this.refreshTokenExpirationDateTime = _data["refreshTokenExpirationDateTime"];
@@ -1327,6 +1380,7 @@ export class ApplicationUser implements IApplicationUser {
                 for (let item of _data["likes"])
                     this.likes!.push(Like.fromJS(item));
             }
+            this.profilePicture = _data["profilePicture"] ? CloudStoredFile.fromJS(_data["profilePicture"]) : undefined as any;
         }
     }
 
@@ -1356,7 +1410,6 @@ export class ApplicationUser implements IApplicationUser {
         data["accessFailedCount"] = this.accessFailedCount;
         data["name"] = this.name;
         data["role"] = this.role;
-        data["logo"] = this.logo;
         data["description"] = this.description;
         data["refreshToken"] = this.refreshToken;
         data["refreshTokenExpirationDateTime"] = this.refreshTokenExpirationDateTime;
@@ -1370,6 +1423,7 @@ export class ApplicationUser implements IApplicationUser {
             for (let item of this.likes)
                 data["likes"].push(item ? item.toJSON() : undefined as any);
         }
+        data["profilePicture"] = this.profilePicture ? this.profilePicture.toJSON() : undefined as any;
         return data;
     }
 }
@@ -1392,12 +1446,12 @@ export interface IApplicationUser {
     accessFailedCount?: number;
     name?: string | undefined;
     role?: string | undefined;
-    logo?: string | undefined;
     description?: string | undefined;
     refreshToken?: string | undefined;
     refreshTokenExpirationDateTime?: string;
     publications?: Publication[] | undefined;
     likes?: Like[] | undefined;
+    profilePicture?: CloudStoredFile;
 }
 
 export class AuthenticationResponse implements IAuthenticationResponse {
@@ -1506,8 +1560,10 @@ export class CloudStoredFile implements ICloudStoredFile {
     createdAt?: string;
     fileType?: FileType;
     fileSize?: number;
-    publicationId?: string;
+    publicationId?: string | undefined;
     publication?: Publication;
+    applicationUserId?: string | undefined;
+    applicationUser?: ApplicationUser;
 
     constructor(data?: ICloudStoredFile) {
         if (data) {
@@ -1527,6 +1583,8 @@ export class CloudStoredFile implements ICloudStoredFile {
             this.fileSize = _data["fileSize"];
             this.publicationId = _data["publicationId"];
             this.publication = _data["publication"] ? Publication.fromJS(_data["publication"]) : undefined as any;
+            this.applicationUserId = _data["applicationUserId"];
+            this.applicationUser = _data["applicationUser"] ? ApplicationUser.fromJS(_data["applicationUser"]) : undefined as any;
         }
     }
 
@@ -1546,6 +1604,8 @@ export class CloudStoredFile implements ICloudStoredFile {
         data["fileSize"] = this.fileSize;
         data["publicationId"] = this.publicationId;
         data["publication"] = this.publication ? this.publication.toJSON() : undefined as any;
+        data["applicationUserId"] = this.applicationUserId;
+        data["applicationUser"] = this.applicationUser ? this.applicationUser.toJSON() : undefined as any;
         return data;
     }
 }
@@ -1556,8 +1616,10 @@ export interface ICloudStoredFile {
     createdAt?: string;
     fileType?: FileType;
     fileSize?: number;
-    publicationId?: string;
+    publicationId?: string | undefined;
     publication?: Publication;
+    applicationUserId?: string | undefined;
+    applicationUser?: ApplicationUser;
 }
 
 export class CommentDto implements ICommentDto {
@@ -1852,8 +1914,8 @@ export interface IProblemDetails {
 export class ProfileDto implements IProfileDto {
     userId?: string;
     name?: string | undefined;
-    logo?: string | undefined;
-    publicationIds?: string[] | undefined;
+    profilePictureUrl?: string | undefined;
+    publicationsCount?: number | undefined;
 
     constructor(data?: IProfileDto) {
         if (data) {
@@ -1868,12 +1930,8 @@ export class ProfileDto implements IProfileDto {
         if (_data) {
             this.userId = _data["userId"];
             this.name = _data["name"];
-            this.logo = _data["logo"];
-            if (Array.isArray(_data["publicationIds"])) {
-                this.publicationIds = [] as any;
-                for (let item of _data["publicationIds"])
-                    this.publicationIds!.push(item);
-            }
+            this.profilePictureUrl = _data["profilePictureUrl"];
+            this.publicationsCount = _data["publicationsCount"];
         }
     }
 
@@ -1888,12 +1946,8 @@ export class ProfileDto implements IProfileDto {
         data = typeof data === 'object' ? data : {};
         data["userId"] = this.userId;
         data["name"] = this.name;
-        data["logo"] = this.logo;
-        if (Array.isArray(this.publicationIds)) {
-            data["publicationIds"] = [];
-            for (let item of this.publicationIds)
-                data["publicationIds"].push(item);
-        }
+        data["profilePictureUrl"] = this.profilePictureUrl;
+        data["publicationsCount"] = this.publicationsCount;
         return data;
     }
 }
@@ -1901,48 +1955,8 @@ export class ProfileDto implements IProfileDto {
 export interface IProfileDto {
     userId?: string;
     name?: string | undefined;
-    logo?: string | undefined;
-    publicationIds?: string[] | undefined;
-}
-
-export class ProfileEditRequest implements IProfileEditRequest {
-    name?: string | undefined;
-    logo?: string | undefined;
-
-    constructor(data?: IProfileEditRequest) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (this as any)[property] = (data as any)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.name = _data["name"];
-            this.logo = _data["logo"];
-        }
-    }
-
-    static fromJS(data: any): ProfileEditRequest {
-        data = typeof data === 'object' ? data : {};
-        let result = new ProfileEditRequest();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["name"] = this.name;
-        data["logo"] = this.logo;
-        return data;
-    }
-}
-
-export interface IProfileEditRequest {
-    name?: string | undefined;
-    logo?: string | undefined;
+    profilePictureUrl?: string | undefined;
+    publicationsCount?: number | undefined;
 }
 
 export class Publication implements IPublication {

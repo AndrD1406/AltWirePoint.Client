@@ -2,7 +2,6 @@
     <aside class="sidebar flex flex-col h-screen">
         <p-panel-menu [model]="sideItems" styleClass="sidebar-menu"></p-panel-menu>
 
-        <!-- footer now right under the menu -->
         <div class="sidebar-footer p-4 space-y-4">
         <select
             [(ngModel)]="currentLanguage"
@@ -29,7 +28,7 @@
         >
             <img
             class="w-24 h-24 rounded-full object-cover"
-            [src]="getLogoSrc(userLogo)"
+            [src]="getLogoSrc(userProfilePicture)"
             alt="User logo"
             />
             <span class="ml-2 text-white">{{ userName }}</span>
