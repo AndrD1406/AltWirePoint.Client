@@ -2,47 +2,28 @@
     <div class="p-4 max-w-2xl mx-auto flex flex-col gap-6">
 
         <div class="flex items-center justify-between">
-        <div class="flex items-center gap-4">
-            <img
-                class="w-24 h-24 rounded-full object-cover"
-                [src]="getLogoSrc(profile.profilePictureUrl)"
-                alt="{{ 'UserLogo' | localize }}"
-            />
-            <span class="text-2xl font-semibold">{{ profile.name }}</span>
-        </div>
-        <button
-            *ngIf="isOwnProfile"
-            type="button"
-            (click)="openEditDialog()"
-            class="w-10 h-10 flex items-center justify-center rounded-full 
-                bg-gray-800 hover:bg-gray-700 text-white"
-        >
-            <i class="pi pi-pencil text-xl"></i>
-        </button>
+            <div class="flex items-center gap-4">
+                <img class="w-24 h-24 rounded-full object-cover" [src]="getLogoSrc(profile.profilePictureUrl)"
+                    alt="{{ 'UserLogo' | localize }}" />
+                <span class="text-2xl font-semibold">{{ profile.name }}</span>
+            </div>
+            <button *ngIf="isOwnProfile" type="button" (click)="openEditDialog()" class="w-10 h-10 flex items-center justify-center rounded-full 
+                bg-gray-800 hover:bg-gray-700 text-white">
+                <i class="pi pi-pencil text-xl"></i>
+            </button>
         </div>
 
         <div class="border-b border-gray-600"></div>
 
-        <p-dialog
-            header="{{ 'EditProfile' | localize }}"
-            [(visible)]="showEditDialog"
-            [modal]="true"
-            [style]="{ width: '400px' }"
-            (onHide)="showEditDialog = false"
-        >
-        <edit-profile
-            *ngIf="showEditDialog"
-            [name]="profile.name || ''"
-            [initialProfilePictureUrl]="profile.profilePictureUrl"
-            (saved)="profile = $event; showEditDialog = false"
-            (cancelled)="showEditDialog = false"
-        ></edit-profile>
+        <p-dialog header="{{ 'EditProfile' | localize }}" [(visible)]="showEditDialog" [modal]="true"
+            [style]="{ width: '400px' }" (onHide)="showEditDialog = false">
+            <edit-profile *ngIf="showEditDialog" [name]="profile.name || ''"
+                [initialProfilePictureUrl]="profile.profilePictureUrl"
+                (saved)="profile = $event; showEditDialog = false" (cancelled)="showEditDialog = false"></edit-profile>
         </p-dialog>
 
         <div class="flex flex-col gap-4 pt-4">
-            <publications-container
-                [authorId]="profile.userId"
-            ></publications-container>
+            <publications-container [authorId]="profile.userId"></publications-container>
         </div>
     </div>
 </ng-container>

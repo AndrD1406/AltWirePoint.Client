@@ -54,8 +54,7 @@
             icon="pi pi-upload"
             label="{{ 'ChooseLogoImage' | localize }}"
             (click)="fileInput.click()"
-            class="inline-flex items-center justify-center px-4 py-2
-                bg-green-500 hover:bg-green-600 text-white rounded-md"
+            class="inline-flex items-center justify-center px-4 py-2 btn-primary rounded-md"
         ></button>
         <div class="text-sm text-gray-400">
             {{ 'OrPasteAnImage' | localize }}
@@ -83,7 +82,7 @@
         label="{{ 'Save' | localize }}"
         [disabled]="loading || form.invalid"
         [loading]="loading"
-        class="bg-green-600 hover:bg-green-700 text-white"
+        class="btn-primary rounded-md px-4 py-2"
         ></button>
     </div>
 </form>

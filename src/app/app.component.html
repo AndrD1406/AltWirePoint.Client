@@ -6,7 +6,7 @@
         <select
             [(ngModel)]="currentLanguage"
             (ngModelChange)="switchLanguage($event)"
-            class="w-full bg-gray-700 text-white rounded px-2 py-1"
+            class="w-full bg-gray-700 text-white rounded px-3 py-2 text-lg"
         >
             <option *ngFor="let l of languages" [value]="l.code">
             {{ l.label }}
@@ -18,20 +18,23 @@
             type="button"
             label="{{ 'Post' | localize }}"
             icon="pi pi-plus"
-            class="w-full"
+            class="w-full btn-primary rounded-md py-3 text-lg font-semibold"
             (click)="openPostModal()"
         ></button>
 
         <div
-            class="flex items-center cursor-pointer"
+            class="flex items-center justify-between cursor-pointer p-3 hover:bg-gray-800 rounded-xl transition-colors"
             (click)="userMenu.toggle($event)"
         >
-            <img
-            class="w-24 h-24 rounded-full object-cover"
-            [src]="getLogoSrc(userProfilePicture)"
-            alt="User logo"
-            />
-            <span class="ml-2 text-white">{{ userName }}</span>
+            <div class="flex items-center">
+                <img
+                    class="w-14 h-14 rounded-full object-cover"
+                    [src]="getLogoSrc(userProfilePicture)"
+                    alt="User logo"
+                />
+                <span class="ml-3 text-white font-semibold text-lg">{{ userName }}</span>
+            </div>
+            <i class="pi pi-ellipsis-v text-gray-400 mr-1 text-lg"></i>
         </div>
         </div>
     </aside>

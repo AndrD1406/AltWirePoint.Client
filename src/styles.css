@@ -4,3 +4,17 @@
 @tailwind components;
 @tailwind utilities;
 
+.btn-primary {
+    background-color: #44D399 !important;
+    color: #ffffff !important;
+    transition: filter 0.2s ease-in-out, transform 0.1s active;
+    border: none !important;
+}
+
+.btn-primary:hover {
+    filter: brightness(0.9);
+}
+
+.btn-primary:active {
+    transform: scale(0.98);
+}
