@@ -49,15 +49,14 @@ export class PublicationComponent extends AppComponentBase implements OnInit {
 
         // only show delete menu when it's your own post
         // TODO: re-add edit once an update API endpoint exists
-        if (this.isOwn) {
         this.menuItems = [
             {
-            label: this.t('Delete'),
-            icon: 'pi pi-trash',
-            command: () => this.confirmDelete()
+                label: this.t('Delete'),
+                icon: 'pi pi-trash',
+                command: () => this.confirmDelete(),
+                visible: this.isOwn
             }
         ];
-        }
     }
     
     onView() {

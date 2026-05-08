@@ -21,21 +21,21 @@
         </span>
         </a>
 
-        <ng-container *ngIf="isOwn">
-        <button
-            pButton
-            type="button"
-            icon="pi pi-ellipsis-v"
-            styleClass="p-button-text text-gray-500 hover:text-white"
-            (click)="menu.toggle($event)"
-        ></button>
-        <p-menu
-            #menu
-            [popup]="true"
-            [model]="menuItems"
-            appendTo="body"
-        ></p-menu>
-        </ng-container>
+        <div *ngIf="menuItems && menuItems.length > 0">
+            <button
+                pButton
+                type="button"
+                icon="pi pi-ellipsis-v"
+                class="btn-primary rounded-full p-2"
+                (click)="menu.toggle($event)"
+            ></button>
+            <p-menu
+                #menu
+                [popup]="true"
+                [model]="menuItems"
+                appendTo="body"
+            ></p-menu>
+        </div>
     </div>
 
     <div *ngIf="publication.description" class="text-sm leading-relaxed">

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, Input, OnInit, ViewChild } from '@angular/core';
 import { CommentDto, LikeDto, PublicationDto, PublicationServiceProxy, FileParameter } from '../../api/service-proxies';
 import { PublicationComponent } from "../publication/publication.component";
 import { CommonModule } from '@angular/common';
@@ -96,13 +96,13 @@ export class PublicationsContainerComponent extends AppComponentBase implements 
         return pub.id;
     }
 
+    @HostListener('window:scroll', [])
     onScroll() {
-        const el = this.scrollContainer.nativeElement;
-        if (
-            !this.loading &&
-            !this.allLoaded &&
-            el.scrollTop + el.clientHeight >= el.scrollHeight - 50
-        ) {
+        if (this.loading || this.allLoaded) return;
+        
+        const pos = (document.documentElement.scrollTop || document.body.scrollTop) + document.documentElement.clientHeight;
+        const max = document.documentElement.scrollHeight;
+        if (pos >= max - 50) {
             this.loadNextPage();
         }
     }
