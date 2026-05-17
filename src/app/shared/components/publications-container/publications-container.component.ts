@@ -10,6 +10,7 @@ import { AuthService } from '../../api/auth.service';
 import { LocalizePipe } from "../../pipes/localization.pipe";
 import { LocalizationService } from '../../services/localization.service';
 import { AppComponentBase } from '../../app-component-base';
+import { Router } from '@angular/router';
 import { isVideoFile } from '../../api/file-parameter.utils';
 
 interface FilePreview {
@@ -29,6 +30,18 @@ interface FilePreview {
 export class PublicationsContainerComponent extends AppComponentBase implements OnInit
 {
     @Input() authorId?: string;
+
+    private _parentId?: string;
+    @Input()
+    set parentId(value: string | undefined) {
+        if (value !== this._parentId) {
+            this._parentId = value;
+            this.resetAndLoad();
+        }
+    }
+    get parentId(): string | undefined {
+        return this._parentId;
+    }
 
     private _searchQuery = '';
     @Input()
@@ -69,13 +82,16 @@ export class PublicationsContainerComponent extends AppComponentBase implements 
         private publicationService: PublicationServiceProxy,
         private authService: AuthService,
         private cd: ChangeDetectorRef,
+        private router: Router,
         loc: LocalizationService
     ) {
         super(loc);
     }
 
     ngOnInit(): void {
-        this.loadNextPage();
+        if (!this.loading) {
+            this.loadNextPage();
+        }
     }
 
     resetAndLoad() {
@@ -87,9 +103,11 @@ export class PublicationsContainerComponent extends AppComponentBase implements 
 
     handleView(id: string) {
         const p = this.publications.find(x => x.id === id);
-        if (!p) return;
-        this.selectedPub = p;
-        this.showDetailDialog = true;
+        this.router.navigate(['/', id], { state: { publication: p } });
+    }
+
+    handleDeleted(id: string) {
+        this.publications = this.publications.filter(p => p.id !== id);
     }
 
     trackByPub(_: number, pub: PublicationDto) {
@@ -114,6 +132,51 @@ export class PublicationsContainerComponent extends AppComponentBase implements 
         const currentSkip = this.skip;
         this.skip += this.take;
 
+        // Comments mode: load comments for a parent publication
+        if (this.parentId !== undefined) {
+            if (!this.parentId) {
+                this.loading = false;
+                return;
+            }
+            this.publicationService.getCommentsForPublication(
+                this.parentId,
+                currentSkip,
+                this.take
+            ).subscribe({
+                next: (batch: CommentDto[]) => {
+                    const asPubs: PublicationDto[] = batch.map(c => {
+                        const p = new PublicationDto();
+                        p.id = c.id;
+                        p.description = c.description;
+                        p.fileUrls = c.fileUrls;
+                        p.createdAt = c.createdAt;
+                        p.authorId = c.authorId;
+                        p.authorName = c.authorName;
+                        p.authorProfilePictureUrl = c.authorProfilePictureUrl;
+                        p.likeCount = c.likeCount;
+                        p.commentCount = c.commentCount;
+                        p.isLikedByCurrentUser = c.isLikedByCurrentUser;
+                        return p;
+                    });
+
+                    const unique = asPubs.filter(
+                        p => !this.publications.some(x => x.id === p.id)
+                    );
+                    this.publications = [...this.publications, ...unique];
+                    this.loading = false;
+                    this.allLoaded = batch.length < this.take;
+                    this.cd.markForCheck();
+                },
+                error: (err: any) => {
+                    this.loading = false;
+                    this.allLoaded = true;
+                    this.cd.markForCheck();
+                }
+            });
+            return;
+        }
+
+        // Publications mode
         const page$ = this._searchQuery
             ? this.publicationService.search(
                   this._searchQuery,
@@ -136,9 +199,6 @@ export class PublicationsContainerComponent extends AppComponentBase implements 
                 const unique = batch.filter(
                     (p: PublicationDto) => !this.publications.some(x => x.id === p.id)
                 );
-                unique.forEach(
-                    (p: PublicationDto) => (p.likes = (p.likes || []).filter((l: LikeDto) => l.isLiked))
-                );
 
                 this.publications = [...this.publications, ...unique];
                 this.loading = false;
@@ -148,8 +208,6 @@ export class PublicationsContainerComponent extends AppComponentBase implements 
             error: (err: any) => {
                 this.loading = false;
                 this.allLoaded = true;
-                this.commentError =
-                    err.error?.detail || this.t('FailedToAddComment');
                 this.cd.markForCheck();
             }
         });
@@ -158,11 +216,12 @@ export class PublicationsContainerComponent extends AppComponentBase implements 
     handleLike(pubId: string) {
         const pub = this.publications.find(p => p.id === pubId)!;
         this.publicationService.like(pubId).subscribe(likeDto => {
-            pub.likes = pub.likes || [];
-            const idx = pub.likes.findIndex(l => l.id === likeDto.id);
-            if (idx > -1) pub.likes[idx] = likeDto;
-            else pub.likes.push(likeDto);
-            pub.likes = pub.likes.filter(l => l.isLiked);
+            pub.isLikedByCurrentUser = likeDto.isLiked;
+            if (likeDto.isLiked) {
+                pub.likeCount = (pub.likeCount || 0) + 1;
+            } else {
+                pub.likeCount = Math.max(0, (pub.likeCount || 0) - 1);
+            }
         });
     }
 
@@ -242,8 +301,7 @@ export class PublicationsContainerComponent extends AppComponentBase implements 
                     p => p.id === newComment.parentId
                 );
                 if (parent) {
-                    parent.comments = parent.comments || [];
-                    parent.comments.push(newComment);
+                    parent.commentCount = (parent.commentCount || 0) + 1;
                 }
                 this.clearCommentFiles();
                 this.showCommentDialog = false;

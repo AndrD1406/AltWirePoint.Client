@@ -37,6 +37,14 @@ export const routes: Routes = [
         canActivate: [AuthGuard],
     },
 
+    {
+        path: ':id',
+        loadComponent: () =>
+        import('./shared/components/publication-view/publication-view.component').then(
+            m => m.PublicationViewComponent
+        ),
+        canActivate: [AuthGuard],
+    },
     { path: '', redirectTo: 'home', pathMatch: 'full' },
     { path: '**', redirectTo: 'home' },
 ];

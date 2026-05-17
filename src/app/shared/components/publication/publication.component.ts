@@ -91,7 +91,7 @@ export class PublicationComponent extends AppComponentBase implements OnInit {
     }
 
     get avatarSrc(): string {
-        const logo = this.publication.authorLogo;
+        const logo = this.publication.authorProfilePictureUrl;
         if (!logo) return this.defaultLogo;
         return logo.startsWith('http') || logo.startsWith('data:')
         ? logo

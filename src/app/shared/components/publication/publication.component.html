@@ -62,19 +62,20 @@
     <div class="flex items-center gap-6 mt-2">
         <button
         type="button"
-        (click)="onLike()"
+        (click)="onLike(); $event.stopPropagation()"
         class="flex items-center gap-1 px-2 py-1 rounded-xl hover:bg-gray-800/50 transition"
+        [ngClass]="{'text-primary': publication.isLikedByCurrentUser}"
         >
-        <i class="pi pi-thumbs-up"></i>
-        <span>{{ 'Like' | localize }} {{ publication.likes?.length || 0 }}</span>
+        <i class="pi" [ngClass]="publication.isLikedByCurrentUser ? 'pi-thumbs-up-fill' : 'pi-thumbs-up'"></i>
+        <span>{{ 'Like' | localize }} {{ publication.likeCount || 0 }}</span>
         </button>
         <button
         type="button"
-        (click)="onComment()"
+        (click)="onComment(); $event.stopPropagation()"
         class="flex items-center gap-1 px-2 py-1 rounded-xl hover:bg-gray-800/50 transition"
         >
         <i class="pi pi-comments"></i>
-        <span>{{ 'Comment' | localize }}</span>
+        <span>{{ 'Comment' | localize }} {{ publication.commentCount || 0 }}</span>
         </button>
     </div>
 </div>

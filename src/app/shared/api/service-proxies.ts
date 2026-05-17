@@ -664,7 +664,7 @@ export class PublicationServiceProxy {
     /**
      * @return OK
      */
-    getById(id: string): Observable<Publication> {
+    getById(id: string): Observable<PublicationDto> {
         let url_ = this.baseUrl + "/api/Publication/GetById/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -686,14 +686,14 @@ export class PublicationServiceProxy {
                 try {
                     return this.processGetById(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<Publication>;
+                    return _observableThrow(e) as any as Observable<PublicationDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<Publication>;
+                return _observableThrow(response_) as any as Observable<PublicationDto>;
         }));
     }
 
-    protected processGetById(response: HttpResponseBase): Observable<Publication> {
+    protected processGetById(response: HttpResponseBase): Observable<PublicationDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -704,7 +704,7 @@ export class PublicationServiceProxy {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = Publication.fromJS(resultData200);
+            result200 = PublicationDto.fromJS(resultData200);
             return _observableOf(result200);
             }));
         } else if (status === 404) {
@@ -1252,14 +1252,24 @@ export class PublicationServiceProxy {
 
     /**
      * @param id (optional) 
+     * @param skip (optional) 
+     * @param take (optional) 
      * @return OK
      */
-    getCommentsForPublication(id: string | undefined): Observable<CommentDto[]> {
+    getCommentsForPublication(id: string | undefined, skip: number | undefined, take: number | undefined): Observable<CommentDto[]> {
         let url_ = this.baseUrl + "/api/Publication/GetCommentsForPublication?";
         if (id === null)
             throw new globalThis.Error("The parameter 'id' cannot be null.");
         else if (id !== undefined)
             url_ += "id=" + encodeURIComponent("" + id) + "&";
+        if (skip === null)
+            throw new globalThis.Error("The parameter 'skip' cannot be null.");
+        else if (skip !== undefined)
+            url_ += "skip=" + encodeURIComponent("" + skip) + "&";
+        if (take === null)
+            throw new globalThis.Error("The parameter 'take' cannot be null.");
+        else if (take !== undefined)
+            url_ += "take=" + encodeURIComponent("" + take) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -1624,13 +1634,16 @@ export interface ICloudStoredFile {
 
 export class CommentDto implements ICommentDto {
     id?: string;
-    parentId?: string;
-    createdAt?: string;
+    description?: string | undefined;
     fileUrls?: string[] | undefined;
-    content?: string | undefined;
+    createdAt?: string;
     authorId?: string;
     authorName?: string | undefined;
-    authorLogo?: string | undefined;
+    authorProfilePictureUrl?: string | undefined;
+    likeCount?: number;
+    commentCount?: number;
+    isLikedByCurrentUser?: boolean;
+    parentId?: string;
 
     constructor(data?: ICommentDto) {
         if (data) {
@@ -1644,17 +1657,20 @@ export class CommentDto implements ICommentDto {
     init(_data?: any) {
         if (_data) {
             this.id = _data["id"];
-            this.parentId = _data["parentId"];
-            this.createdAt = _data["createdAt"];
+            this.description = _data["description"];
             if (Array.isArray(_data["fileUrls"])) {
                 this.fileUrls = [] as any;
                 for (let item of _data["fileUrls"])
                     this.fileUrls!.push(item);
             }
-            this.content = _data["content"];
+            this.createdAt = _data["createdAt"];
             this.authorId = _data["authorId"];
             this.authorName = _data["authorName"];
-            this.authorLogo = _data["authorLogo"];
+            this.authorProfilePictureUrl = _data["authorProfilePictureUrl"];
+            this.likeCount = _data["likeCount"];
+            this.commentCount = _data["commentCount"];
+            this.isLikedByCurrentUser = _data["isLikedByCurrentUser"];
+            this.parentId = _data["parentId"];
         }
     }
 
@@ -1668,30 +1684,36 @@ export class CommentDto implements ICommentDto {
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["id"] = this.id;
-        data["parentId"] = this.parentId;
-        data["createdAt"] = this.createdAt;
+        data["description"] = this.description;
         if (Array.isArray(this.fileUrls)) {
             data["fileUrls"] = [];
             for (let item of this.fileUrls)
                 data["fileUrls"].push(item);
         }
-        data["content"] = this.content;
+        data["createdAt"] = this.createdAt;
         data["authorId"] = this.authorId;
         data["authorName"] = this.authorName;
-        data["authorLogo"] = this.authorLogo;
+        data["authorProfilePictureUrl"] = this.authorProfilePictureUrl;
+        data["likeCount"] = this.likeCount;
+        data["commentCount"] = this.commentCount;
+        data["isLikedByCurrentUser"] = this.isLikedByCurrentUser;
+        data["parentId"] = this.parentId;
         return data;
     }
 }
 
 export interface ICommentDto {
     id?: string;
-    parentId?: string;
-    createdAt?: string;
+    description?: string | undefined;
     fileUrls?: string[] | undefined;
-    content?: string | undefined;
+    createdAt?: string;
     authorId?: string;
     authorName?: string | undefined;
-    authorLogo?: string | undefined;
+    authorProfilePictureUrl?: string | undefined;
+    likeCount?: number;
+    commentCount?: number;
+    isLikedByCurrentUser?: boolean;
+    parentId?: string;
 }
 
 export enum FileType {
@@ -2098,9 +2120,10 @@ export class PublicationDto implements IPublicationDto {
     createdAt?: string;
     authorId?: string;
     authorName?: string | undefined;
-    authorLogo?: string | undefined;
-    likes?: LikeDto[] | undefined;
-    comments?: CommentDto[] | undefined;
+    authorProfilePictureUrl?: string | undefined;
+    likeCount?: number;
+    commentCount?: number;
+    isLikedByCurrentUser?: boolean;
 
     constructor(data?: IPublicationDto) {
         if (data) {
@@ -2123,17 +2146,10 @@ export class PublicationDto implements IPublicationDto {
             this.createdAt = _data["createdAt"];
             this.authorId = _data["authorId"];
             this.authorName = _data["authorName"];
-            this.authorLogo = _data["authorLogo"];
-            if (Array.isArray(_data["likes"])) {
-                this.likes = [] as any;
-                for (let item of _data["likes"])
-                    this.likes!.push(LikeDto.fromJS(item));
-            }
-            if (Array.isArray(_data["comments"])) {
-                this.comments = [] as any;
-                for (let item of _data["comments"])
-                    this.comments!.push(CommentDto.fromJS(item));
-            }
+            this.authorProfilePictureUrl = _data["authorProfilePictureUrl"];
+            this.likeCount = _data["likeCount"];
+            this.commentCount = _data["commentCount"];
+            this.isLikedByCurrentUser = _data["isLikedByCurrentUser"];
         }
     }
 
@@ -2156,17 +2172,10 @@ export class PublicationDto implements IPublicationDto {
         data["createdAt"] = this.createdAt;
         data["authorId"] = this.authorId;
         data["authorName"] = this.authorName;
-        data["authorLogo"] = this.authorLogo;
-        if (Array.isArray(this.likes)) {
-            data["likes"] = [];
-            for (let item of this.likes)
-                data["likes"].push(item ? item.toJSON() : undefined as any);
-        }
-        if (Array.isArray(this.comments)) {
-            data["comments"] = [];
-            for (let item of this.comments)
-                data["comments"].push(item ? item.toJSON() : undefined as any);
-        }
+        data["authorProfilePictureUrl"] = this.authorProfilePictureUrl;
+        data["likeCount"] = this.likeCount;
+        data["commentCount"] = this.commentCount;
+        data["isLikedByCurrentUser"] = this.isLikedByCurrentUser;
         return data;
     }
 }
@@ -2178,9 +2187,10 @@ export interface IPublicationDto {
     createdAt?: string;
     authorId?: string;
     authorName?: string | undefined;
-    authorLogo?: string | undefined;
-    likes?: LikeDto[] | undefined;
-    comments?: CommentDto[] | undefined;
+    authorProfilePictureUrl?: string | undefined;
+    likeCount?: number;
+    commentCount?: number;
+    isLikedByCurrentUser?: boolean;
 }
 
 export class RegisterRequest implements IRegisterRequest {
