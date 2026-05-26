@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { AccountServiceProxy, ProfileDto, PublicationServiceProxy } from '../../shared/api/service-proxies';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../shared/api/auth.service';
 import { Dialog } from 'primeng/dialog';
 import { EditProfileComponent } from '../../shared/components/edit-profile/edit-profile.component';
@@ -23,21 +23,29 @@ export class ProfileComponent implements OnInit {
 
     constructor(
         private route: ActivatedRoute,
+        private router: Router,
         private publicationService: PublicationServiceProxy,
         private accountService: AccountServiceProxy,
         private authService: AuthService
     ) {}
 
     ngOnInit(): void {
-        let id = this.route.snapshot.paramMap.get('id')
-            || this.authService.getUserIdFromToken()!;
-        if (!id) return;
+        this.route.paramMap.subscribe(params => {
+            let id = params.get('id');
+            
+            // If the URL is explicitly /profile/null or empty, fallback to the current user's token
+            if (!id || id === 'null' || id === 'undefined') {
+                id = this.authService.getUserIdFromToken();
+            }
 
-        this.isOwnProfile = id === this.authService.getUserIdFromToken();
+            if (!id) return;
 
-        this.accountService.getUserById(id)
-        .subscribe(dto => {
-            this.profile = dto;
+            this.isOwnProfile = id === this.authService.getUserIdFromToken();
+
+            this.accountService.getUserById(id)
+            .subscribe(dto => {
+                this.profile = dto;
+            });
         });
     }
 
@@ -50,5 +58,10 @@ export class ProfileComponent implements OnInit {
     openEditDialog() {
         if (!this.profile) return;
         this.showEditDialog = true;
+    }
+
+    goToChat() {
+        if (!this.profile) return;
+        this.router.navigate(['/chat', this.profile.userId]);
     }
 }
