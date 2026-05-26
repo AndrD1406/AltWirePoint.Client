@@ -1,0 +1,42 @@
+<div class="flex w-full mb-4" [ngClass]="{'justify-end': isMine, 'justify-start': !isMine}">
+  <div class="flex max-w-[75%]" [ngClass]="{'flex-row-reverse': isMine, 'flex-row': !isMine}">
+    
+    <!-- Avatar -->
+    <div class="flex-shrink-0" [ngClass]="isMine ? 'ml-3' : 'mr-3'">
+      <p-avatar [image]="profilePicture" shape="circle" size="large"></p-avatar>
+    </div>
+
+    <!-- Message Bubble -->
+    <div class="flex flex-col" [ngClass]="{'items-end': isMine, 'items-start': !isMine}">
+      <span class="text-xs text-gray-400 mb-1 mx-1">{{ message.senderName }} • {{ sentAtLocal | date:'MMM d, h:mm a' }}</span>
+      
+      <div class="px-4 py-3 rounded-2xl relative shadow-md"
+           [ngClass]="isMine ? 'bg-green-600 text-white rounded-tr-sm' : 'bg-gray-800 text-gray-100 rounded-tl-sm'">
+        <p class="whitespace-pre-wrap break-words m-0">{{ message.content }}</p>
+        
+        <!-- Attachments if any -->
+        <div *ngIf="message.fileUrls && message.fileUrls.length > 0" class="mt-3 flex flex-wrap gap-2">
+            <div *ngFor="let url of message.fileUrls">
+                <ng-container *ngIf="url.includes('images'); else fileLink">
+                    <img [src]="url" class="max-h-48 rounded cursor-pointer hover:opacity-90" alt="Attachment" />
+                </ng-container>
+                <ng-template #fileLink>
+                    <a [href]="url" target="_blank" 
+                       class="flex items-center gap-2 px-3 py-2 rounded bg-black/20 hover:bg-black/30 transition-colors text-sm no-underline"
+                       [ngClass]="isMine ? 'text-white' : 'text-green-300'">
+                        <i class="pi pi-file"></i>
+                        <span>File Attachment</span>
+                    </a>
+                </ng-template>
+            </div>
+        </div>
+      </div>
+      
+      <!-- Read Status -->
+      <span *ngIf="isMine && message.isRead" class="text-[10px] text-green-400 mt-1 flex items-center gap-1">
+        <i class="pi pi-check-circle"></i> Read
+      </span>
+    </div>
+    
+  </div>
+</div>

@@ -45,8 +45,12 @@ export class AuthService {
         if (!token) return null;
 
         try {
-            const payloadBase64 = token.split('.')[1];
-            const payloadJson   = atob(payloadBase64.replace(/-/g, '+').replace(/_/g, '/'));
+            let payloadBase64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+            const pad = payloadBase64.length % 4;
+            if (pad) {
+                payloadBase64 += '='.repeat(4 - pad);
+            }
+            const payloadJson   = atob(payloadBase64);
             const payload      = JSON.parse(payloadJson);
 
             return payload['nameid'] || payload['sub'] || null;

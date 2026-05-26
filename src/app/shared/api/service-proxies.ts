@@ -580,6 +580,352 @@ export class AccountServiceProxy {
 @Injectable({
     providedIn: 'root'
 })
+export class ChatServiceProxy {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @param body (optional) 
+     * @return Created
+     */
+    createChat(body: CreateChatRequest | undefined): Observable<ChatDto> {
+        let url_ = this.baseUrl + "/api/Chat/CreateChat";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCreateChat(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCreateChat(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<ChatDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<ChatDto>;
+        }));
+    }
+
+    protected processCreateChat(response: HttpResponseBase): Observable<ChatDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 201) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result201: any = null;
+            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result201 = ChatDto.fromJS(resultData201);
+            return _observableOf(result201);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    getChats(): Observable<ChatDto[]> {
+        let url_ = this.baseUrl + "/api/Chat/GetChats";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetChats(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetChats(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<ChatDto[]>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<ChatDto[]>;
+        }));
+    }
+
+    protected processGetChats(response: HttpResponseBase): Observable<ChatDto[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(ChatDto.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param skip (optional) 
+     * @param take (optional) 
+     * @return OK
+     */
+    getMessages(chatId: string, skip: number | undefined, take: number | undefined): Observable<MessageDto[]> {
+        let url_ = this.baseUrl + "/api/Chat/GetMessages/{ChatId}?";
+        if (chatId === undefined || chatId === null)
+            throw new globalThis.Error("The parameter 'chatId' must be defined.");
+        url_ = url_.replace("{ChatId}", encodeURIComponent("" + chatId));
+        if (skip === null)
+            throw new globalThis.Error("The parameter 'skip' cannot be null.");
+        else if (skip !== undefined)
+            url_ += "skip=" + encodeURIComponent("" + skip) + "&";
+        if (take === null)
+            throw new globalThis.Error("The parameter 'take' cannot be null.");
+        else if (take !== undefined)
+            url_ += "take=" + encodeURIComponent("" + take) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetMessages(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetMessages(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<MessageDto[]>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<MessageDto[]>;
+        }));
+    }
+
+    protected processGetMessages(response: HttpResponseBase): Observable<MessageDto[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(MessageDto.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status === 403) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result403: any = null;
+            let resultData403 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result403 = ProblemDetails.fromJS(resultData403);
+            return throwException("Forbidden", status, _responseText, _headers, result403);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @return No Content
+     */
+    markAsRead(chatId: string): Observable<void> {
+        let url_ = this.baseUrl + "/api/Chat/MarkAsRead/{ChatId}";
+        if (chatId === undefined || chatId === null)
+            throw new globalThis.Error("The parameter 'chatId' must be defined.");
+        url_ = url_.replace("{ChatId}", encodeURIComponent("" + chatId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+            })
+        };
+
+        return this.http.request("put", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processMarkAsRead(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processMarkAsRead(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processMarkAsRead(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param chatId (optional) 
+     * @param content (optional) 
+     * @param files (optional) 
+     * @return Created
+     */
+    sendMessage(chatId: string | undefined, content: string | undefined, files: FileParameter[] | undefined): Observable<MessageDto> {
+        let url_ = this.baseUrl + "/api/Chat/SendMessage";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = new FormData();
+        if (chatId === null || chatId === undefined)
+            throw new globalThis.Error("The parameter 'chatId' cannot be null.");
+        else
+            content_.append("chatId", chatId.toString());
+        if (content === null || content === undefined)
+            throw new globalThis.Error("The parameter 'content' cannot be null.");
+        else
+            content_.append("content", content.toString());
+        if (files === null || files === undefined)
+            throw new globalThis.Error("The parameter 'files' cannot be null.");
+        else
+            files.forEach(item_ => content_.append("files", item_.data, item_.fileName ? item_.fileName : "files") );
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processSendMessage(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processSendMessage(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<MessageDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<MessageDto>;
+        }));
+    }
+
+    protected processSendMessage(response: HttpResponseBase): Observable<MessageDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 201) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result201: any = null;
+            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result201 = MessageDto.fromJS(resultData201);
+            return _observableOf(result201);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            }));
+        } else if (status === 403) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result403: any = null;
+            let resultData403 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result403 = ProblemDetails.fromJS(resultData403);
+            return throwException("Forbidden", status, _responseText, _headers, result403);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+}
+
+@Injectable({
+    providedIn: 'root'
+})
 export class PublicationServiceProxy {
     private http: HttpClient;
     private baseUrl: string;
@@ -1564,6 +1910,138 @@ export interface IChangePasswordRequest {
     confirmPassword: string;
 }
 
+export class Chat implements IChat {
+    id?: string;
+    name?: string | undefined;
+    createdAt?: string;
+    participants?: ApplicationUser[] | undefined;
+    messages?: Message[] | undefined;
+
+    constructor(data?: IChat) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.name = _data["name"];
+            this.createdAt = _data["createdAt"];
+            if (Array.isArray(_data["participants"])) {
+                this.participants = [] as any;
+                for (let item of _data["participants"])
+                    this.participants!.push(ApplicationUser.fromJS(item));
+            }
+            if (Array.isArray(_data["messages"])) {
+                this.messages = [] as any;
+                for (let item of _data["messages"])
+                    this.messages!.push(Message.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): Chat {
+        data = typeof data === 'object' ? data : {};
+        let result = new Chat();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["name"] = this.name;
+        data["createdAt"] = this.createdAt;
+        if (Array.isArray(this.participants)) {
+            data["participants"] = [];
+            for (let item of this.participants)
+                data["participants"].push(item ? item.toJSON() : undefined as any);
+        }
+        if (Array.isArray(this.messages)) {
+            data["messages"] = [];
+            for (let item of this.messages)
+                data["messages"].push(item ? item.toJSON() : undefined as any);
+        }
+        return data;
+    }
+}
+
+export interface IChat {
+    id?: string;
+    name?: string | undefined;
+    createdAt?: string;
+    participants?: ApplicationUser[] | undefined;
+    messages?: Message[] | undefined;
+}
+
+export class ChatDto implements IChatDto {
+    id?: string;
+    name?: string | undefined;
+    createdAt?: string;
+    participants?: ParticipantDto[] | undefined;
+    lastMessage?: MessageDto;
+    unreadCount?: number;
+
+    constructor(data?: IChatDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.name = _data["name"];
+            this.createdAt = _data["createdAt"];
+            if (Array.isArray(_data["participants"])) {
+                this.participants = [] as any;
+                for (let item of _data["participants"])
+                    this.participants!.push(ParticipantDto.fromJS(item));
+            }
+            this.lastMessage = _data["lastMessage"] ? MessageDto.fromJS(_data["lastMessage"]) : undefined as any;
+            this.unreadCount = _data["unreadCount"];
+        }
+    }
+
+    static fromJS(data: any): ChatDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new ChatDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["name"] = this.name;
+        data["createdAt"] = this.createdAt;
+        if (Array.isArray(this.participants)) {
+            data["participants"] = [];
+            for (let item of this.participants)
+                data["participants"].push(item ? item.toJSON() : undefined as any);
+        }
+        data["lastMessage"] = this.lastMessage ? this.lastMessage.toJSON() : undefined as any;
+        data["unreadCount"] = this.unreadCount;
+        return data;
+    }
+}
+
+export interface IChatDto {
+    id?: string;
+    name?: string | undefined;
+    createdAt?: string;
+    participants?: ParticipantDto[] | undefined;
+    lastMessage?: MessageDto;
+    unreadCount?: number;
+}
+
 export class CloudStoredFile implements ICloudStoredFile {
     id?: string;
     url?: string | undefined;
@@ -1574,6 +2052,8 @@ export class CloudStoredFile implements ICloudStoredFile {
     publication?: Publication;
     applicationUserId?: string | undefined;
     applicationUser?: ApplicationUser;
+    messageId?: string | undefined;
+    message?: Message;
 
     constructor(data?: ICloudStoredFile) {
         if (data) {
@@ -1595,6 +2075,8 @@ export class CloudStoredFile implements ICloudStoredFile {
             this.publication = _data["publication"] ? Publication.fromJS(_data["publication"]) : undefined as any;
             this.applicationUserId = _data["applicationUserId"];
             this.applicationUser = _data["applicationUser"] ? ApplicationUser.fromJS(_data["applicationUser"]) : undefined as any;
+            this.messageId = _data["messageId"];
+            this.message = _data["message"] ? Message.fromJS(_data["message"]) : undefined as any;
         }
     }
 
@@ -1616,6 +2098,8 @@ export class CloudStoredFile implements ICloudStoredFile {
         data["publication"] = this.publication ? this.publication.toJSON() : undefined as any;
         data["applicationUserId"] = this.applicationUserId;
         data["applicationUser"] = this.applicationUser ? this.applicationUser.toJSON() : undefined as any;
+        data["messageId"] = this.messageId;
+        data["message"] = this.message ? this.message.toJSON() : undefined as any;
         return data;
     }
 }
@@ -1630,6 +2114,8 @@ export interface ICloudStoredFile {
     publication?: Publication;
     applicationUserId?: string | undefined;
     applicationUser?: ApplicationUser;
+    messageId?: string | undefined;
+    message?: Message;
 }
 
 export class CommentDto implements ICommentDto {
@@ -1714,6 +2200,54 @@ export interface ICommentDto {
     commentCount?: number;
     isLikedByCurrentUser?: boolean;
     parentId?: string;
+}
+
+export class CreateChatRequest implements ICreateChatRequest {
+    participantIds?: string[] | undefined;
+    name?: string | undefined;
+
+    constructor(data?: ICreateChatRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["participantIds"])) {
+                this.participantIds = [] as any;
+                for (let item of _data["participantIds"])
+                    this.participantIds!.push(item);
+            }
+            this.name = _data["name"];
+        }
+    }
+
+    static fromJS(data: any): CreateChatRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateChatRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.participantIds)) {
+            data["participantIds"] = [];
+            for (let item of this.participantIds)
+                data["participantIds"].push(item);
+        }
+        data["name"] = this.name;
+        return data;
+    }
+}
+
+export interface ICreateChatRequest {
+    participantIds?: string[] | undefined;
+    name?: string | undefined;
 }
 
 export enum FileType {
@@ -1867,6 +2401,206 @@ export class LoginRequest implements ILoginRequest {
 export interface ILoginRequest {
     email: string;
     password: string;
+}
+
+export class Message implements IMessage {
+    id?: string;
+    content?: string | undefined;
+    sentAt?: string;
+    isRead?: boolean;
+    senderId?: string;
+    sender?: ApplicationUser;
+    chatId?: string;
+    chat?: Chat;
+    attachments?: CloudStoredFile[] | undefined;
+
+    constructor(data?: IMessage) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.content = _data["content"];
+            this.sentAt = _data["sentAt"];
+            this.isRead = _data["isRead"];
+            this.senderId = _data["senderId"];
+            this.sender = _data["sender"] ? ApplicationUser.fromJS(_data["sender"]) : undefined as any;
+            this.chatId = _data["chatId"];
+            this.chat = _data["chat"] ? Chat.fromJS(_data["chat"]) : undefined as any;
+            if (Array.isArray(_data["attachments"])) {
+                this.attachments = [] as any;
+                for (let item of _data["attachments"])
+                    this.attachments!.push(CloudStoredFile.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): Message {
+        data = typeof data === 'object' ? data : {};
+        let result = new Message();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["content"] = this.content;
+        data["sentAt"] = this.sentAt;
+        data["isRead"] = this.isRead;
+        data["senderId"] = this.senderId;
+        data["sender"] = this.sender ? this.sender.toJSON() : undefined as any;
+        data["chatId"] = this.chatId;
+        data["chat"] = this.chat ? this.chat.toJSON() : undefined as any;
+        if (Array.isArray(this.attachments)) {
+            data["attachments"] = [];
+            for (let item of this.attachments)
+                data["attachments"].push(item ? item.toJSON() : undefined as any);
+        }
+        return data;
+    }
+}
+
+export interface IMessage {
+    id?: string;
+    content?: string | undefined;
+    sentAt?: string;
+    isRead?: boolean;
+    senderId?: string;
+    sender?: ApplicationUser;
+    chatId?: string;
+    chat?: Chat;
+    attachments?: CloudStoredFile[] | undefined;
+}
+
+export class MessageDto implements IMessageDto {
+    id?: string;
+    content?: string | undefined;
+    sentAt?: string;
+    isRead?: boolean;
+    senderId?: string;
+    senderName?: string | undefined;
+    senderProfilePictureUrl?: string | undefined;
+    chatId?: string;
+    fileUrls?: string[] | undefined;
+
+    constructor(data?: IMessageDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.content = _data["content"];
+            this.sentAt = _data["sentAt"];
+            this.isRead = _data["isRead"];
+            this.senderId = _data["senderId"];
+            this.senderName = _data["senderName"];
+            this.senderProfilePictureUrl = _data["senderProfilePictureUrl"];
+            this.chatId = _data["chatId"];
+            if (Array.isArray(_data["fileUrls"])) {
+                this.fileUrls = [] as any;
+                for (let item of _data["fileUrls"])
+                    this.fileUrls!.push(item);
+            }
+        }
+    }
+
+    static fromJS(data: any): MessageDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new MessageDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["content"] = this.content;
+        data["sentAt"] = this.sentAt;
+        data["isRead"] = this.isRead;
+        data["senderId"] = this.senderId;
+        data["senderName"] = this.senderName;
+        data["senderProfilePictureUrl"] = this.senderProfilePictureUrl;
+        data["chatId"] = this.chatId;
+        if (Array.isArray(this.fileUrls)) {
+            data["fileUrls"] = [];
+            for (let item of this.fileUrls)
+                data["fileUrls"].push(item);
+        }
+        return data;
+    }
+}
+
+export interface IMessageDto {
+    id?: string;
+    content?: string | undefined;
+    sentAt?: string;
+    isRead?: boolean;
+    senderId?: string;
+    senderName?: string | undefined;
+    senderProfilePictureUrl?: string | undefined;
+    chatId?: string;
+    fileUrls?: string[] | undefined;
+}
+
+export class ParticipantDto implements IParticipantDto {
+    id?: string;
+    userName?: string | undefined;
+    name?: string | undefined;
+    profilePictureUrl?: string | undefined;
+
+    constructor(data?: IParticipantDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.userName = _data["userName"];
+            this.name = _data["name"];
+            this.profilePictureUrl = _data["profilePictureUrl"];
+        }
+    }
+
+    static fromJS(data: any): ParticipantDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new ParticipantDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["userName"] = this.userName;
+        data["name"] = this.name;
+        data["profilePictureUrl"] = this.profilePictureUrl;
+        return data;
+    }
+}
+
+export interface IParticipantDto {
+    id?: string;
+    userName?: string | undefined;
+    name?: string | undefined;
+    profilePictureUrl?: string | undefined;
 }
 
 export class ProblemDetails implements IProblemDetails {

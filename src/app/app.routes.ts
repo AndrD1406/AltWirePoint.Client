@@ -38,6 +38,14 @@ export const routes: Routes = [
     },
 
     {
+        path: 'chat/:id',
+        loadComponent: () =>
+        import('./main/chat/chat.component').then(
+            m => m.ChatComponent
+        ),
+        canActivate: [AuthGuard],
+    },
+    {
         path: ':id',
         loadComponent: () =>
         import('./shared/components/publication-view/publication-view.component').then(
