@@ -10,7 +10,7 @@ import { routes }                                  from './app/app.routes';
 import { HTTP_INTERCEPTORS }                       from '@angular/common/http';
 import { environment } from './environments/environment';
 import { API_BASE_URL } from './app/shared/api/service-proxies';
-import { JwtInterceptor } from './app/shared/api/Jwt.Interceptor';
+import { JwtInterceptor } from './app/shared/api/jwt.interceptor';
 import { TokenInterceptor } from './app/shared/api/token.interceptor';
 
 bootstrapApplication(AppComponent, {
