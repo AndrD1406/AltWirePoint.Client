@@ -1,0 +1,32 @@
+<div class="settings-page">
+    <div class="settings-header">
+        <h1>{{ t('Settings') }}</h1>
+    </div>
+
+    <div class="settings-section">
+        <h2 class="section-title">
+            <i class="pi pi-globe"></i>
+            {{ t('Language') }}
+        </h2>
+        <p class="section-description">{{ t('Choose your preferred language') }}</p>
+
+        <div class="language-options">
+            <label
+                *ngFor="let lang of languages"
+                class="language-option"
+                [class.active]="currentLanguage === lang.code"
+                (click)="switchLanguage(lang.code)"
+            >
+                <input
+                    type="radio"
+                    name="language"
+                    [value]="lang.code"
+                    [checked]="currentLanguage === lang.code"
+                    class="language-radio"
+                />
+                <span class="language-label">{{ lang.label }}</span>
+                <i *ngIf="currentLanguage === lang.code" class="pi pi-check check-icon"></i>
+            </label>
+        </div>
+    </div>
+</div>

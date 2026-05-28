@@ -1,7 +1,6 @@
-import { Component, OnInit }        from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { BrowserModule }    from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
-import { FormsModule }      from '@angular/forms';
 import { Router, RouterOutlet }     from '@angular/router';
 import { PanelMenuModule }  from 'primeng/panelmenu';
 import { MenuModule }  from 'primeng/menu';
@@ -21,7 +20,6 @@ import { CommonModule } from '@angular/common';
     standalone: true,
     imports: [
     HttpClientModule,
-    FormsModule,
     RouterOutlet,
     PanelMenuModule,
     ButtonModule,
@@ -35,20 +33,17 @@ import { CommonModule } from '@angular/common';
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.css']
 })
-export class AppComponent extends AppComponentBase implements OnInit {
-    // load from localStorage or default to 'en'
-    currentLanguage = localStorage.getItem('currentLanguage') || 'en';
-
-    languages = [
-        { code: 'en', label: 'English' },
-        { code: 'uk', label: 'Українська' },
-    ];
+export class AppComponent extends AppComponentBase implements OnInit, OnDestroy {
 
     sideItems: MenuItem[]     = [];
     userMenuItems: MenuItem[] = [];
     userName = '';
     userProfilePicture?: string;
     displayPostModal = false;
+    isMobile = false;
+
+    private mobileQuery!: MediaQueryList;
+    private mobileListener!: (e: MediaQueryListEvent) => void;
 
     constructor(
         private authService: AuthService,
@@ -60,9 +55,24 @@ export class AppComponent extends AppComponentBase implements OnInit {
     }
 
     ngOnInit(): void {
-        const myId = this.authService.getUserIdFromToken();
+        // Set up mobile breakpoint listener
+        this.mobileQuery = window.matchMedia('(max-width: 768px)');
+        this.isMobile = this.mobileQuery.matches;
+        this.mobileListener = (e: MediaQueryListEvent | MediaQueryList) => {
+            this.isMobile = e.matches;
+            this.buildMenus();
+        };
+        
+        if (this.mobileQuery.addEventListener) {
+            this.mobileQuery.addEventListener('change', this.mobileListener as EventListener);
+        } else {
+            this.mobileQuery.addListener(this.mobileListener);
+        }
 
-        this.loc.loadTranslations(this.currentLanguage)
+        const myId = this.authService.getUserIdFromToken();
+        const currentLanguage = localStorage.getItem('currentLanguage') || 'en';
+
+        this.loc.loadTranslations(currentLanguage)
             .subscribe(() => this.buildMenus());
 
         if (myId) {
@@ -74,28 +84,34 @@ export class AppComponent extends AppComponentBase implements OnInit {
         }
     }
 
-    switchLanguage(language: string): void {
-        this.currentLanguage = language;
-        localStorage.setItem('currentLanguage', language);
-        this.loc.loadTranslations(language)
-            .subscribe(() => this.buildMenus());
+    ngOnDestroy(): void {
+        if (this.mobileQuery) {
+            if (this.mobileQuery.removeEventListener) {
+                this.mobileQuery.removeEventListener('change', this.mobileListener as EventListener);
+            } else {
+                this.mobileQuery.removeListener(this.mobileListener);
+            }
+        }
     }
 
     private buildMenus(): void {
         const myId = this.authService.getUserIdFromToken();
 
-        this.sideItems = [
-            { label: this.t('Main'),    icon: 'pi pi-home',   routerLink: ['/home']   },
-            { label: this.t('Search'),  icon: 'pi pi-search', routerLink: ['/search'] },
-            { label: this.t('Profile'), icon: 'pi pi-user',   routerLink: ['/profile', myId] },
-            {
-                label: this.t('More'),
-                items: [
-                    { label: this.t('Settings'), icon: 'pi pi-cog',  routerLink: ['/settings'] },
-                    { label: this.t('Help'),     icon: 'pi pi-info', routerLink: ['/help']     }
-                ]
-            }
-        ];
+        if (this.isMobile) {
+            this.sideItems = [
+                { icon: 'pi pi-home',   routerLink: ['/home'],     tooltip: this.t('Main')     },
+                { icon: 'pi pi-search', routerLink: ['/search'],   tooltip: this.t('Search')   },
+                { icon: 'pi pi-user',   routerLink: ['/profile', myId], tooltip: this.t('Profile') },
+                { icon: 'pi pi-cog',    routerLink: ['/settings'], tooltip: this.t('Settings') },
+            ];
+        } else {
+            this.sideItems = [
+                { label: this.t('Main'),     icon: 'pi pi-home',   routerLink: ['/home']     },
+                { label: this.t('Search'),   icon: 'pi pi-search', routerLink: ['/search']   },
+                { label: this.t('Profile'),  icon: 'pi pi-user',   routerLink: ['/profile', myId] },
+                { label: this.t('Settings'), icon: 'pi pi-cog',    routerLink: ['/settings'] },
+            ];
+        }
 
         this.userMenuItems = [
             {

@@ -1,19 +1,13 @@
-<div class="layout">
-    <aside class="sidebar flex flex-col h-screen">
+<div class="layout" [class.mobile]="isMobile">
+    <aside class="sidebar flex flex-col h-screen" [class.collapsed]="isMobile">
         <p-panel-menu [model]="sideItems" styleClass="sidebar-menu"></p-panel-menu>
 
-        <div class="sidebar-footer p-4 space-y-4">
-        <select
-            [(ngModel)]="currentLanguage"
-            (ngModelChange)="switchLanguage($event)"
-            class="w-full bg-gray-700 text-white rounded px-3 py-2 text-lg"
-        >
-            <option *ngFor="let l of languages" [value]="l.code">
-            {{ l.label }}
-            </option>
-        </select>
+        <div class="sidebar-footer" [class.collapsed]="isMobile">
+
+        <!-- Full post button (desktop) -->
 
         <button
+            *ngIf="!isMobile"
             pButton
             type="button"
             label="{{ 'Post' | localize }}"
@@ -22,22 +16,37 @@
             (click)="openPostModal()"
         ></button>
 
+        <!-- Icon-only post button (mobile) -->
+        <button
+            *ngIf="isMobile"
+            pButton
+            type="button"
+            icon="pi pi-plus"
+            class="btn-primary post-btn-mobile"
+            (click)="openPostModal()"
+        ></button>
+
         <div
-            class="flex items-center justify-between cursor-pointer p-3 hover:bg-gray-800 rounded-xl transition-colors"
+            class="user-section flex items-center cursor-pointer p-3 hover:bg-gray-800 rounded-xl transition-colors"
+            [class.justify-between]="!isMobile"
+            [class.justify-center]="isMobile"
             (click)="userMenu.toggle($event)"
         >
             <div class="flex items-center">
                 <img
-                    class="w-14 h-14 rounded-full object-cover"
+                    class="rounded-full object-cover"
+                    [class.w-14]="!isMobile" [class.h-14]="!isMobile"
+                    [class.w-10]="isMobile"  [class.h-10]="isMobile"
                     [src]="getLogoSrc(userProfilePicture)"
                     alt="User logo"
                 />
-                <span class="ml-3 text-white font-semibold text-lg">{{ userName }}</span>
+                <span *ngIf="!isMobile" class="ml-3 text-white font-semibold text-lg">{{ userName }}</span>
             </div>
-            <i class="pi pi-ellipsis-v text-gray-400 mr-1 text-lg"></i>
+            <i *ngIf="!isMobile" class="pi pi-ellipsis-v text-gray-400 mr-1 text-lg"></i>
         </div>
         </div>
     </aside>
+
 
     <main class="content">
         <router-outlet></router-outlet>

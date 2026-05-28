@@ -54,3 +54,48 @@
 .post-btn {
     width: 100%;
 }
+
+.layout.mobile::after {
+    display: none;
+}
+
+.sidebar.collapsed {
+    width: 68px;
+    align-items: center;
+}
+
+:host ::ng-deep .sidebar.collapsed .sidebar-menu .p-panelmenu .p-panelmenu-header-action,
+:host ::ng-deep .sidebar.collapsed .sidebar-menu .p-panelmenu .p-menuitem-link {
+    justify-content: center;
+    padding: 1rem;
+}
+
+:host ::ng-deep .sidebar.collapsed .sidebar-menu .p-panelmenu .p-menuitem-icon {
+    margin-right: 0;
+}
+
+.sidebar-footer.collapsed {
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.post-btn-mobile {
+    width: 48px !important;
+    height: 48px;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+:host ::ng-deep .post-btn-mobile .p-button-icon {
+    margin-right: 0;
+}
+
+.sidebar-footer.collapsed .user-section {
+    padding: 0.5rem;
+}
