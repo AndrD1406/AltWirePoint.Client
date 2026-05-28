@@ -7,10 +7,16 @@
                     alt="{{ 'UserLogo' | localize }}" />
                 <span class="text-2xl font-semibold">{{ profile.name }}</span>
             </div>
-            <button *ngIf="isOwnProfile" type="button" (click)="openEditDialog()" class="w-10 h-10 flex items-center justify-center rounded-full 
-                bg-gray-800 hover:bg-gray-700 text-white">
-                <i class="pi pi-pencil text-xl"></i>
-            </button>
+            <div class="flex gap-2">
+                <button *ngIf="!isOwnProfile" type="button" (click)="goToChat()" class="w-10 h-10 flex items-center justify-center rounded-full 
+                    bg-blue-600 hover:bg-blue-500 text-white">
+                    <i class="pi pi-comments text-xl"></i>
+                </button>
+                <button *ngIf="isOwnProfile" type="button" (click)="openEditDialog()" class="w-10 h-10 flex items-center justify-center rounded-full 
+                    bg-gray-800 hover:bg-gray-700 text-white">
+                    <i class="pi pi-pencil text-xl"></i>
+                </button>
+            </div>
         </div>
 
         <div class="border-b border-gray-600"></div>
