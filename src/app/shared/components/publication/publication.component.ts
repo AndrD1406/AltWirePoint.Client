@@ -47,9 +47,12 @@ export class PublicationComponent extends AppComponentBase implements OnInit {
         const myId = this.authService.getUserIdFromToken();
         this.isOwn = myId === this.publication.authorId;
 
-        // only show delete menu when it's your own post
-        // TODO: re-add edit once an update API endpoint exists
         this.menuItems = [
+            {
+                label: this.t('CopyLink'),
+                icon: 'pi pi-copy',
+                command: () => this.copyLink()
+            },
             {
                 label: this.t('Delete'),
                 icon: 'pi pi-trash',
@@ -57,6 +60,23 @@ export class PublicationComponent extends AppComponentBase implements OnInit {
                 visible: this.isOwn
             }
         ];
+    }
+
+    copyLink() {
+        const url = `${window.location.origin}/${this.publication.id}`;
+        navigator.clipboard.writeText(url).then(() => {
+            const copyItem = this.menuItems.find(item => item.icon === 'pi pi-copy' || item.icon === 'pi pi-check');
+            if (copyItem) {
+                copyItem.label = this.t('LinkCopied');
+                copyItem.icon = 'pi pi-check';
+                this.menuItems = [...this.menuItems];
+                setTimeout(() => {
+                    copyItem.label = this.t('CopyLink');
+                    copyItem.icon = 'pi pi-copy';
+                    this.menuItems = [...this.menuItems];
+                }, 2000);
+            }
+        });
     }
     
     onView() {

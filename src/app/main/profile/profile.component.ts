@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { AccountServiceProxy, ProfileDto, PublicationServiceProxy } from '../../shared/api/service-proxies';
+import { AccountServiceProxy, FollowServiceProxy, FollowStatsDto, ProfileDto, PublicationServiceProxy } from '../../shared/api/service-proxies';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../shared/api/auth.service';
 import { Dialog } from 'primeng/dialog';
@@ -18,15 +18,19 @@ import { LocalizePipe } from "../../shared/pipes/localization.pipe";
 export class ProfileComponent implements OnInit {
     profile?: ProfileDto;
     isOwnProfile = false;
-
     showEditDialog = false;
+
+    isFollowing = false;
+    followLoading = false;
+    followStats?: FollowStatsDto;
 
     constructor(
         private route: ActivatedRoute,
         private router: Router,
         private publicationService: PublicationServiceProxy,
         private accountService: AccountServiceProxy,
-        private authService: AuthService
+        private authService: AuthService,
+        private followService: FollowServiceProxy
     ) {}
 
     ngOnInit(): void {
@@ -46,6 +50,16 @@ export class ProfileComponent implements OnInit {
             .subscribe(dto => {
                 this.profile = dto;
             });
+
+            this.followService.stats(id).subscribe(stats => {
+                this.followStats = stats;
+            });
+
+            if (!this.isOwnProfile) {
+                this.followService.isFollowing(id).subscribe(following => {
+                    this.isFollowing = following;
+                });
+            }
         });
     }
 
@@ -63,5 +77,21 @@ export class ProfileComponent implements OnInit {
     goToChat() {
         if (!this.profile) return;
         this.router.navigate(['/chat', this.profile.userId]);
+    }
+
+    toggleFollow() {
+        if (!this.profile?.userId || this.followLoading) return;
+        this.followLoading = true;
+        this.followService.toggle(this.profile.userId).subscribe({
+            next: (result) => {
+                this.isFollowing = result.isFollowing ?? false;
+                // refresh follower count
+                this.followService.stats(this.profile!.userId!).subscribe(stats => {
+                    this.followStats = stats;
+                });
+                this.followLoading = false;
+            },
+            error: () => { this.followLoading = false; }
+        });
     }
 }

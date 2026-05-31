@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, ElementRef, HostListener, Input, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { CommentDto, LikeDto, PublicationDto, PublicationServiceProxy, FileParameter } from '../../api/service-proxies';
 import { PublicationComponent } from "../publication/publication.component";
 import { CommonModule } from '@angular/common';
@@ -30,6 +30,7 @@ interface FilePreview {
 export class PublicationsContainerComponent extends AppComponentBase implements OnInit
 {
     @Input() authorId?: string;
+    @Output() commentsLoaded = new EventEmitter<number>();
 
     private _parentId?: string;
     @Input()
@@ -165,6 +166,7 @@ export class PublicationsContainerComponent extends AppComponentBase implements 
                     this.publications = [...this.publications, ...unique];
                     this.loading = false;
                     this.allLoaded = batch.length < this.take;
+                    this.commentsLoaded.emit(this.publications.length);
                     this.cd.markForCheck();
                 },
                 error: (err: any) => {

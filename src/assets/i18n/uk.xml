@@ -69,5 +69,6 @@
     <string key="ConfirmationRequired">Підтвердження є обов'язковим.</string>
     <string key="PasswordsMustMatch">Паролі мають співпадати.</string>
     <string key="AlreadyHaveAccount">Вже маєте акаунт?</string>
-    <string key="RegisterFailed">Не вдалося зареєструватися.</string>
+    <string key="CopyLink">Копіювати посилання</string>
+    <string key="LinkCopied">Посилання скопійовано в буфер обміну!</string>
 </resources>

@@ -926,6 +926,339 @@ export class ChatServiceProxy {
 @Injectable({
     providedIn: 'root'
 })
+export class FollowServiceProxy {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @return OK
+     */
+    toggle(userId: string): Observable<FollowDto> {
+        let url_ = this.baseUrl + "/api/Follow/Toggle/{userId}";
+        if (userId === undefined || userId === null)
+            throw new globalThis.Error("The parameter 'userId' must be defined.");
+        url_ = url_.replace("{userId}", encodeURIComponent("" + userId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processToggle(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processToggle(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<FollowDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<FollowDto>;
+        }));
+    }
+
+    protected processToggle(response: HttpResponseBase): Observable<FollowDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = FollowDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("Not Found", status, _responseText, _headers, result404);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    isFollowing(userId: string): Observable<boolean> {
+        let url_ = this.baseUrl + "/api/Follow/IsFollowing/{userId}";
+        if (userId === undefined || userId === null)
+            throw new globalThis.Error("The parameter 'userId' must be defined.");
+        url_ = url_.replace("{userId}", encodeURIComponent("" + userId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processIsFollowing(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processIsFollowing(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<boolean>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<boolean>;
+        }));
+    }
+
+    protected processIsFollowing(response: HttpResponseBase): Observable<boolean> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : null as any;
+    
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    stats(userId: string): Observable<FollowStatsDto> {
+        let url_ = this.baseUrl + "/api/Follow/Stats/{userId}";
+        if (userId === undefined || userId === null)
+            throw new globalThis.Error("The parameter 'userId' must be defined.");
+        url_ = url_.replace("{userId}", encodeURIComponent("" + userId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processStats(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processStats(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<FollowStatsDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<FollowStatsDto>;
+        }));
+    }
+
+    protected processStats(response: HttpResponseBase): Observable<FollowStatsDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = FollowStatsDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param skip (optional) 
+     * @param take (optional) 
+     * @return OK
+     */
+    followers(userId: string, skip: number | undefined, take: number | undefined): Observable<ProfileDto[]> {
+        let url_ = this.baseUrl + "/api/Follow/Followers/{userId}?";
+        if (userId === undefined || userId === null)
+            throw new globalThis.Error("The parameter 'userId' must be defined.");
+        url_ = url_.replace("{userId}", encodeURIComponent("" + userId));
+        if (skip === null)
+            throw new globalThis.Error("The parameter 'skip' cannot be null.");
+        else if (skip !== undefined)
+            url_ += "skip=" + encodeURIComponent("" + skip) + "&";
+        if (take === null)
+            throw new globalThis.Error("The parameter 'take' cannot be null.");
+        else if (take !== undefined)
+            url_ += "take=" + encodeURIComponent("" + take) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processFollowers(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processFollowers(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<ProfileDto[]>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<ProfileDto[]>;
+        }));
+    }
+
+    protected processFollowers(response: HttpResponseBase): Observable<ProfileDto[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(ProfileDto.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param skip (optional) 
+     * @param take (optional) 
+     * @return OK
+     */
+    following(userId: string, skip: number | undefined, take: number | undefined): Observable<ProfileDto[]> {
+        let url_ = this.baseUrl + "/api/Follow/Following/{userId}?";
+        if (userId === undefined || userId === null)
+            throw new globalThis.Error("The parameter 'userId' must be defined.");
+        url_ = url_.replace("{userId}", encodeURIComponent("" + userId));
+        if (skip === null)
+            throw new globalThis.Error("The parameter 'skip' cannot be null.");
+        else if (skip !== undefined)
+            url_ += "skip=" + encodeURIComponent("" + skip) + "&";
+        if (take === null)
+            throw new globalThis.Error("The parameter 'take' cannot be null.");
+        else if (take !== undefined)
+            url_ += "take=" + encodeURIComponent("" + take) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processFollowing(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processFollowing(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<ProfileDto[]>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<ProfileDto[]>;
+        }));
+    }
+
+    protected processFollowing(response: HttpResponseBase): Observable<ProfileDto[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(ProfileDto.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+}
+
+@Injectable({
+    providedIn: 'root'
+})
 export class PublicationServiceProxy {
     private http: HttpClient;
     private baseUrl: string;
@@ -1694,6 +2027,8 @@ export class ApplicationUser implements IApplicationUser {
     publications?: Publication[] | undefined;
     likes?: Like[] | undefined;
     profilePicture?: CloudStoredFile;
+    followers?: UserFollow[] | undefined;
+    following?: UserFollow[] | undefined;
 
     constructor(data?: IApplicationUser) {
         if (data) {
@@ -1737,6 +2072,16 @@ export class ApplicationUser implements IApplicationUser {
                     this.likes!.push(Like.fromJS(item));
             }
             this.profilePicture = _data["profilePicture"] ? CloudStoredFile.fromJS(_data["profilePicture"]) : undefined as any;
+            if (Array.isArray(_data["followers"])) {
+                this.followers = [] as any;
+                for (let item of _data["followers"])
+                    this.followers!.push(UserFollow.fromJS(item));
+            }
+            if (Array.isArray(_data["following"])) {
+                this.following = [] as any;
+                for (let item of _data["following"])
+                    this.following!.push(UserFollow.fromJS(item));
+            }
         }
     }
 
@@ -1780,6 +2125,16 @@ export class ApplicationUser implements IApplicationUser {
                 data["likes"].push(item ? item.toJSON() : undefined as any);
         }
         data["profilePicture"] = this.profilePicture ? this.profilePicture.toJSON() : undefined as any;
+        if (Array.isArray(this.followers)) {
+            data["followers"] = [];
+            for (let item of this.followers)
+                data["followers"].push(item ? item.toJSON() : undefined as any);
+        }
+        if (Array.isArray(this.following)) {
+            data["following"] = [];
+            for (let item of this.following)
+                data["following"].push(item ? item.toJSON() : undefined as any);
+        }
         return data;
     }
 }
@@ -1808,6 +2163,8 @@ export interface IApplicationUser {
     publications?: Publication[] | undefined;
     likes?: Like[] | undefined;
     profilePicture?: CloudStoredFile;
+    followers?: UserFollow[] | undefined;
+    following?: UserFollow[] | undefined;
 }
 
 export class AuthenticationResponse implements IAuthenticationResponse {
@@ -2255,6 +2612,90 @@ export enum FileType {
     _1 = 1,
 }
 
+export class FollowDto implements IFollowDto {
+    followerId?: string;
+    followedId?: string;
+    isFollowing?: boolean;
+
+    constructor(data?: IFollowDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.followerId = _data["followerId"];
+            this.followedId = _data["followedId"];
+            this.isFollowing = _data["isFollowing"];
+        }
+    }
+
+    static fromJS(data: any): FollowDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new FollowDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["followerId"] = this.followerId;
+        data["followedId"] = this.followedId;
+        data["isFollowing"] = this.isFollowing;
+        return data;
+    }
+}
+
+export interface IFollowDto {
+    followerId?: string;
+    followedId?: string;
+    isFollowing?: boolean;
+}
+
+export class FollowStatsDto implements IFollowStatsDto {
+    followerCount?: number;
+    followingCount?: number;
+
+    constructor(data?: IFollowStatsDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.followerCount = _data["followerCount"];
+            this.followingCount = _data["followingCount"];
+        }
+    }
+
+    static fromJS(data: any): FollowStatsDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new FollowStatsDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["followerCount"] = this.followerCount;
+        data["followingCount"] = this.followingCount;
+        return data;
+    }
+}
+
+export interface IFollowStatsDto {
+    followerCount?: number;
+    followingCount?: number;
+}
+
 export class Like implements ILike {
     id?: string;
     authorId?: string | undefined;
@@ -2672,6 +3113,9 @@ export class ProfileDto implements IProfileDto {
     name?: string | undefined;
     profilePictureUrl?: string | undefined;
     publicationsCount?: number | undefined;
+    followerCount?: number;
+    followingCount?: number;
+    isFollowedByCurrentUser?: boolean;
 
     constructor(data?: IProfileDto) {
         if (data) {
@@ -2688,6 +3132,9 @@ export class ProfileDto implements IProfileDto {
             this.name = _data["name"];
             this.profilePictureUrl = _data["profilePictureUrl"];
             this.publicationsCount = _data["publicationsCount"];
+            this.followerCount = _data["followerCount"];
+            this.followingCount = _data["followingCount"];
+            this.isFollowedByCurrentUser = _data["isFollowedByCurrentUser"];
         }
     }
 
@@ -2704,6 +3151,9 @@ export class ProfileDto implements IProfileDto {
         data["name"] = this.name;
         data["profilePictureUrl"] = this.profilePictureUrl;
         data["publicationsCount"] = this.publicationsCount;
+        data["followerCount"] = this.followerCount;
+        data["followingCount"] = this.followingCount;
+        data["isFollowedByCurrentUser"] = this.isFollowedByCurrentUser;
         return data;
     }
 }
@@ -2713,6 +3163,9 @@ export interface IProfileDto {
     name?: string | undefined;
     profilePictureUrl?: string | undefined;
     publicationsCount?: number | undefined;
+    followerCount?: number;
+    followingCount?: number;
+    isFollowedByCurrentUser?: boolean;
 }
 
 export class Publication implements IPublication {
@@ -3017,6 +3470,62 @@ export class TokenModel implements ITokenModel {
 export interface ITokenModel {
     token?: string | undefined;
     refreshToken?: string | undefined;
+}
+
+export class UserFollow implements IUserFollow {
+    id?: string;
+    followerId?: string;
+    follower?: ApplicationUser;
+    followedId?: string;
+    followed?: ApplicationUser;
+    followedAt?: string;
+
+    constructor(data?: IUserFollow) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (this as any)[property] = (data as any)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.followerId = _data["followerId"];
+            this.follower = _data["follower"] ? ApplicationUser.fromJS(_data["follower"]) : undefined as any;
+            this.followedId = _data["followedId"];
+            this.followed = _data["followed"] ? ApplicationUser.fromJS(_data["followed"]) : undefined as any;
+            this.followedAt = _data["followedAt"];
+        }
+    }
+
+    static fromJS(data: any): UserFollow {
+        data = typeof data === 'object' ? data : {};
+        let result = new UserFollow();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["followerId"] = this.followerId;
+        data["follower"] = this.follower ? this.follower.toJSON() : undefined as any;
+        data["followedId"] = this.followedId;
+        data["followed"] = this.followed ? this.followed.toJSON() : undefined as any;
+        data["followedAt"] = this.followedAt;
+        return data;
+    }
+}
+
+export interface IUserFollow {
+    id?: string;
+    followerId?: string;
+    follower?: ApplicationUser;
+    followedId?: string;
+    followed?: ApplicationUser;
+    followedAt?: string;
 }
 
 export interface FileParameter {

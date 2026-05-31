@@ -69,5 +69,6 @@
     <string key="ConfirmationRequired">Confirmation is required.</string>
     <string key="PasswordsMustMatch">Passwords must match.</string>
     <string key="AlreadyHaveAccount">Already have an account?</string>
-    <string key="RegisterFailed">Registration failed.</string>
+    <string key="CopyLink">Copy Link</string>
+    <string key="LinkCopied">Link copied to clipboard!</string>
 </resources>

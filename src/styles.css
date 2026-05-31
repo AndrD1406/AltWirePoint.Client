@@ -4,6 +4,13 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+    background-color: #121212 !important;
+    color: #ffffff;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
 .btn-primary {
     background-color: #44D399 !important;
     color: #ffffff !important;
@@ -18,3 +25,4 @@
 .btn-primary:active {
     transform: scale(0.98);
 }
+

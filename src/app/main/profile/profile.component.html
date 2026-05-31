@@ -5,13 +5,29 @@
             <div class="flex items-center gap-4">
                 <img class="w-24 h-24 rounded-full object-cover" [src]="getLogoSrc(profile.profilePictureUrl)"
                     alt="{{ 'UserLogo' | localize }}" />
-                <span class="text-2xl font-semibold">{{ profile.name }}</span>
+                <div class="flex flex-col">
+                    <span class="text-2xl font-semibold">{{ profile.name }}</span>
+                    <span class="text-sm text-gray-400 mt-1">
+                        <span class="font-semibold text-white">{{ followStats?.followerCount ?? 0 }}</span> followers &nbsp;·&nbsp;
+                        <span class="font-semibold text-white">{{ followStats?.followingCount ?? 0 }}</span> following
+                    </span>
+                </div>
             </div>
             <div class="flex gap-2">
-                <button *ngIf="!isOwnProfile" type="button" (click)="goToChat()" class="w-10 h-10 flex items-center justify-center rounded-full 
-                    bg-blue-600 hover:bg-blue-500 text-white">
-                    <i class="pi pi-comments text-xl"></i>
-                </button>
+                <ng-container *ngIf="!isOwnProfile">
+                    <button type="button" (click)="toggleFollow()" [disabled]="followLoading"
+                        class="px-4 h-10 flex items-center justify-center rounded-full font-semibold text-sm transition-colors duration-200"
+                        [ngClass]="isFollowing
+                            ? 'bg-gray-700 hover:bg-red-700 text-white border border-gray-600'
+                            : 'bg-blue-600 hover:bg-blue-500 text-white'">
+                        <i *ngIf="followLoading" class="pi pi-spinner pi-spin mr-2"></i>
+                        <span>{{ isFollowing ? 'Unfollow' : 'Follow' }}</span>
+                    </button>
+                    <button type="button" (click)="goToChat()" class="w-10 h-10 flex items-center justify-center rounded-full 
+                        bg-gray-700 hover:bg-gray-600 text-white border border-gray-600">
+                        <i class="pi pi-comments text-xl"></i>
+                    </button>
+                </ng-container>
                 <button *ngIf="isOwnProfile" type="button" (click)="openEditDialog()" class="w-10 h-10 flex items-center justify-center rounded-full 
                     bg-gray-800 hover:bg-gray-700 text-white">
                     <i class="pi pi-pencil text-xl"></i>

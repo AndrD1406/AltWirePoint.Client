@@ -1,5 +1,5 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommentDto, PublicationDto, PublicationServiceProxy, FileParameter } from '../../api/service-proxies';
 import { CommonModule } from '@angular/common';
 import { PublicationComponent } from '../publication/publication.component';
@@ -38,6 +38,8 @@ interface FilePreview {
   styleUrl: './publication-view.component.css'
 })
 export class PublicationViewComponent extends AppComponentBase implements OnInit, OnDestroy {
+    @ViewChild(PublicationsContainerComponent) commentsContainer?: PublicationsContainerComponent;
+
     publication?: PublicationDto;
     loading = true;
 
@@ -52,6 +54,7 @@ export class PublicationViewComponent extends AppComponentBase implements OnInit
 
     constructor(
         private route: ActivatedRoute,
+        private router: Router,
         private publicationService: PublicationServiceProxy,
         private authService: AuthService,
         private cd: ChangeDetectorRef,
@@ -61,10 +64,14 @@ export class PublicationViewComponent extends AppComponentBase implements OnInit
     }
 
     ngOnInit(): void {
+        const navigation = this.router.getCurrentNavigation();
+        const statePub = navigation?.extras.state?.['publication'] as PublicationDto | undefined;
+        const statePublication = statePub || (window.history.state?.publication as PublicationDto | undefined);
+
         this.routeSub = this.route.paramMap.subscribe(params => {
             const id = params.get('id');
             if (id) {
-                this.loadPublication(id);
+                this.loadPublication(id, statePublication);
             }
         });
     }
@@ -73,13 +80,25 @@ export class PublicationViewComponent extends AppComponentBase implements OnInit
         this.routeSub?.unsubscribe();
     }
 
-    private loadPublication(id: string) {
-        this.publication = undefined;
-        this.loading = true;
+    private loadPublication(id: string, statePub?: PublicationDto) {
+        if (statePub && statePub.id === id) {
+            this.publication = statePub;
+            this.loading = false;
+            this.cd.markForCheck();
+        } else {
+            this.publication = undefined;
+            this.loading = true;
+        }
 
         this.publicationService.getById(id).subscribe({
             next: (pub) => {
-                this.publication = pub;
+                if (pub) {
+                    if ((pub.commentCount === undefined || pub.commentCount === null || pub.commentCount === 0) &&
+                        statePub && statePub.id === id && statePub.commentCount) {
+                        pub.commentCount = statePub.commentCount;
+                    }
+                    this.publication = pub;
+                }
                 this.loading = false;
                 this.cd.markForCheck();
             },
@@ -88,6 +107,13 @@ export class PublicationViewComponent extends AppComponentBase implements OnInit
                 this.cd.markForCheck();
             }
         });
+    }
+
+    onCommentsLoaded(count: number) {
+        if (this.publication && (this.publication.commentCount === undefined || this.publication.commentCount === null || this.publication.commentCount < count)) {
+            this.publication.commentCount = count;
+            this.cd.markForCheck();
+        }
     }
 
     handleLike() {
@@ -176,6 +202,7 @@ export class PublicationViewComponent extends AppComponentBase implements OnInit
                 this.publication!.commentCount = (this.publication!.commentCount || 0) + 1;
                 this.clearCommentFiles();
                 this.showCommentDialog = false;
+                this.commentsContainer?.resetAndLoad();
             },
             error: err => {
                 this.commentLoading = false;
