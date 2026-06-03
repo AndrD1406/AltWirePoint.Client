@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { AccountServiceProxy, FollowServiceProxy, FollowStatsDto, ProfileDto, PublicationServiceProxy } from '../../shared/api/service-proxies';
+import { AccountServiceProxy, FollowServiceProxy, FollowStatsDto, ProfileDto, PublicationServiceProxy, ModerationServiceProxy, BanStatusDto, BanRequest, GetBanStatusServiceProxy } from '../../shared/api/service-proxies';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../shared/api/auth.service';
 import { Dialog } from 'primeng/dialog';
@@ -8,10 +8,12 @@ import { EditProfileComponent } from '../../shared/components/edit-profile/edit-
 import { PublicationsContainerComponent } from '../../shared/components/publications-container/publications-container.component';
 import { LocalizePipe } from "../../shared/pipes/localization.pipe";
 
+import { FormsModule } from '@angular/forms';
+
 @Component({
     selector: 'app-profile',
     standalone: true,
-    imports: [CommonModule, PublicationsContainerComponent, Dialog, EditProfileComponent, LocalizePipe],
+    imports: [CommonModule, PublicationsContainerComponent, Dialog, EditProfileComponent, LocalizePipe, FormsModule],
     templateUrl: './profile.component.html',
     styleUrl: './profile.component.css'
 })
@@ -24,13 +26,22 @@ export class ProfileComponent implements OnInit {
     followLoading = false;
     followStats?: FollowStatsDto;
 
+    isAdmin = false;
+    banStatus?: BanStatusDto;
+    showBanDialog = false;
+    banReason = '';
+    banDuration = '7'; // Default 1 week
+    banLoading = false;
+
     constructor(
         private route: ActivatedRoute,
         private router: Router,
         private publicationService: PublicationServiceProxy,
         private accountService: AccountServiceProxy,
         private authService: AuthService,
-        private followService: FollowServiceProxy
+        private followService: FollowServiceProxy,
+        private moderationService: ModerationServiceProxy,
+        private getBanStatusService: GetBanStatusServiceProxy
     ) {}
 
     ngOnInit(): void {
@@ -59,6 +70,67 @@ export class ProfileComponent implements OnInit {
                 this.followService.isFollowing(id).subscribe(following => {
                     this.isFollowing = following;
                 });
+            }
+
+            this.isAdmin = this.authService.isAdmin();
+            if (this.isAdmin && !this.isOwnProfile) {
+                this.loadBanStatus(id);
+            }
+        });
+    }
+
+    loadBanStatus(userId: string) {
+        this.getBanStatusService.banStatus(userId).subscribe(status => {
+            this.banStatus = status;
+        });
+    }
+
+    openBanDialog() {
+        this.banReason = '';
+        this.banDuration = '7';
+        this.showBanDialog = true;
+    }
+
+    submitBan() {
+        if (!this.profile?.userId) return;
+        
+        let bannedUntil: Date | undefined = undefined;
+        if (this.banDuration !== 'permanent') {
+            const days = parseInt(this.banDuration, 10);
+            bannedUntil = new Date();
+            bannedUntil.setDate(bannedUntil.getDate() + days);
+        }
+
+        const request = new BanRequest();
+        request.userId = this.profile.userId;
+        request.reason = this.banReason;
+        request.bannedUntil = bannedUntil ? bannedUntil.toISOString() : undefined;
+
+        this.banLoading = true;
+        this.moderationService.banUser(request).subscribe({
+            next: () => {
+                this.showBanDialog = false;
+                this.banLoading = false;
+                this.loadBanStatus(this.profile!.userId!);
+            },
+            error: () => {
+                this.banLoading = false;
+            }
+        });
+    }
+
+    unbanUser() {
+        if (!this.profile?.userId) return;
+        if (!confirm('Are you sure you want to unban this user?')) return;
+        
+        this.banLoading = true;
+        this.moderationService.unbanUser(this.profile.userId).subscribe({
+            next: () => {
+                this.banLoading = false;
+                this.loadBanStatus(this.profile!.userId!);
+            },
+            error: () => {
+                this.banLoading = false;
             }
         });
     }

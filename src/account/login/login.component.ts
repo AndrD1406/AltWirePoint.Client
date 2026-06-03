@@ -30,8 +30,7 @@ import { LocalizePipe } from "../../app/shared/pipes/localization.pipe";
 export class LoginComponent {
     model = {
         email:      '',
-        password:   '',
-        rememberMe: false
+        password:   ''
     };
     loading = false;
     error?: string;
@@ -53,8 +52,8 @@ export class LoginComponent {
 
         this.api.login(dto).subscribe({
         next: (resp: AuthenticationResponse) => {
-            this.authService.setRememberMe(this.model.rememberMe);
-            this.authService.storeTokens(resp, this.model.rememberMe);
+            this.authService.setRememberMe(false);
+            this.authService.storeTokens(resp, false);
             this.router.navigate(['/']);
         },
         error: err => {

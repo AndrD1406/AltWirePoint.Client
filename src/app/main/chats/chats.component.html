@@ -1,0 +1,54 @@
+<div class="p-4">
+    <div class="max-w-2xl mx-auto">
+        <h2 class="text-2xl font-bold text-white mb-6">{{ 'Chats' | localize }}</h2>
+
+        <div class="flex flex-col gap-3">
+            <div
+                *ngFor="let chat of chats"
+                [routerLink]="getChatLink(chat)"
+                class="chat-card flex items-center gap-4 p-4 rounded-xl bg-gray-800/50 hover:bg-gray-700/60 border border-gray-700/50 cursor-pointer transition-all duration-200"
+            >
+                <img
+                    [src]="getChatAvatar(chat)"
+                    alt="Chat Avatar"
+                    class="w-12 h-12 rounded-full object-cover ring-2 ring-gray-600"
+                />
+                
+                <div class="flex-1 min-w-0">
+                    <div class="flex justify-between items-baseline mb-1">
+                        <h3 class="font-semibold text-white text-base truncate">{{ getChatTitle(chat) }}</h3>
+                        <span *ngIf="chat.lastMessage" class="text-xs text-gray-500 whitespace-nowrap ml-2">
+                            {{ chat.lastMessage.sentAt | date:'shortTime' }}
+                        </span>
+                    </div>
+                    
+                    <p *ngIf="chat.lastMessage" class="text-sm text-gray-400 truncate">
+                        <span *ngIf="chat.lastMessage.senderId === myUserId">{{ 'You' | localize }}: </span>
+                        {{ chat.lastMessage.content }}
+                        <span *ngIf="!chat.lastMessage.content && chat.lastMessage.fileUrls?.length">
+                            <i class="pi pi-file mr-1"></i>{{ 'Attachment' | localize }}
+                        </span>
+                    </p>
+                    <p *ngIf="!chat.lastMessage" class="text-sm text-gray-500 italic">
+                        {{ 'NoMessagesYet' | localize }}
+                    </p>
+                </div>
+                
+                <div *ngIf="chat.unreadCount" class="bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full min-w-[20px] text-center">
+                    {{ chat.unreadCount }}
+                </div>
+            </div>
+
+            <!-- Loading indicator -->
+            <div *ngIf="loading" class="flex justify-center py-6">
+                <i class="pi pi-spin pi-spinner text-2xl text-gray-400"></i>
+            </div>
+
+            <!-- Empty state -->
+            <div *ngIf="!loading && chats.length === 0" class="text-center py-12 text-gray-500">
+                <i class="pi pi-comments text-5xl mb-4 block opacity-50"></i>
+                <p class="text-lg">{{ 'NoChatsFound' | localize }}</p>
+            </div>
+        </div>
+    </div>
+</div>

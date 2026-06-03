@@ -102,6 +102,7 @@ export class AppComponent extends AppComponentBase implements OnInit, OnDestroy 
                 { icon: 'pi pi-home',   routerLink: ['/home'],     tooltip: this.t('Main')     },
                 { icon: 'pi pi-search', routerLink: ['/search'],   tooltip: this.t('Search')   },
                 { icon: 'pi pi-user',   routerLink: ['/profile', myId], tooltip: this.t('Profile') },
+                { icon: 'pi pi-comments', routerLink: ['/chats'], tooltip: this.t('Chats') },
                 { icon: 'pi pi-cog',    routerLink: ['/settings'], tooltip: this.t('Settings') },
             ];
         } else {
@@ -109,6 +110,7 @@ export class AppComponent extends AppComponentBase implements OnInit, OnDestroy 
                 { label: this.t('Main'),     icon: 'pi pi-home',   routerLink: ['/home']     },
                 { label: this.t('Search'),   icon: 'pi pi-search', routerLink: ['/search']   },
                 { label: this.t('Profile'),  icon: 'pi pi-user',   routerLink: ['/profile', myId] },
+                { label: this.t('Chats'),    icon: 'pi pi-comments', routerLink: ['/chats'] },
                 { label: this.t('Settings'), icon: 'pi pi-cog',    routerLink: ['/settings'] },
             ];
         }

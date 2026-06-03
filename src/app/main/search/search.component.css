@@ -1,0 +1,46 @@
+::ng-deep .search-tabs .p-tabs-nav {
+    background: transparent;
+    border: none;
+    gap: 0.5rem;
+}
+
+::ng-deep .search-tabs .p-tab {
+    background: transparent !important;
+    border: none !important;
+    color: #9ca3af !important;
+    font-weight: 600;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.5rem 0.5rem 0 0;
+    transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+::ng-deep .search-tabs .p-tab:hover {
+    color: #e5e7eb !important;
+    background: rgba(55, 65, 81, 0.5) !important;
+}
+
+::ng-deep .search-tabs .p-tab-active,
+::ng-deep .search-tabs .p-tab[data-p-active="true"] {
+    color: #ffffff !important;
+    background: rgba(59, 130, 246, 0.15) !important;
+}
+
+::ng-deep .search-tabs .p-tablist-active-bar {
+    background-color: #3b82f6 !important;
+    height: 2px;
+    bottom: 0;
+}
+
+::ng-deep .search-tabs .p-tabpanels {
+    background: transparent;
+    padding: 0;
+}
+
+::ng-deep .search-tabs .p-tabpanel {
+    padding: 0;
+}
+
+.person-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}

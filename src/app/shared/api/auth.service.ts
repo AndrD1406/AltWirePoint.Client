@@ -41,17 +41,42 @@ export class AuthService {
     }
 
     getUserIdFromToken(): string | null {
+        const payload = this.getJwtPayload();
+        if (!payload) return null;
+        return payload['nameid'] || payload['sub'] || null;
+    }
+
+    isAdmin(): boolean {
+        const payload = this.getJwtPayload();
+        if (!payload) return false;
+        
+        const permissionsStr = payload['permissions'];
+        if (!permissionsStr) return false;
+
+        try {
+            const binaryString = atob(permissionsStr);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            
+            // 51 is BanUsers, 255 is AccessAll (short.MaxValue cast to byte)
+            return bytes.includes(51) || bytes.includes(255);
+        } catch (e) {
+            return false;
+        }
+    }
+
+    private getJwtPayload(): any {
         const token = this.cookies.get('jwt');
         if (!token) return null;
 
         try {
             const payloadBase64 = token.split('.')[1];
             const payloadJson   = atob(payloadBase64.replace(/-/g, '+').replace(/_/g, '/'));
-            const payload      = JSON.parse(payloadJson);
-
-            return payload['nameid'] || payload['sub'] || null;
+            return JSON.parse(payloadJson);
         } catch {
-        return null;
+            return null;
         }
     }
 

@@ -38,7 +38,7 @@
                     [class.w-14]="!isMobile" [class.h-14]="!isMobile"
                     [class.w-10]="isMobile"  [class.h-10]="isMobile"
                     [src]="getLogoSrc(userProfilePicture)"
-                    alt="User logo"
+                    alt="{{ 'UserLogo' | localize }}"
                 />
                 <span *ngIf="!isMobile" class="ml-3 text-white font-semibold text-lg">{{ userName }}</span>
             </div>
@@ -55,7 +55,7 @@
     <p-menu #userMenu [popup]="true" [model]="userMenuItems"></p-menu>
 
     <p-dialog
-        header="New Publication"
+        header="{{ 'NewPublication' | localize }}"
         [(visible)]="displayPostModal"
         [modal]="true"
         [closable]="false"

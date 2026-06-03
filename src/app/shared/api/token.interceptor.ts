@@ -8,7 +8,7 @@ import {
 import { CookieService } from 'ngx-cookie-service';
 import { AuthService } from './auth.service';
 import { Router } from '@angular/router';
-import { catchError, switchMap, throwError } from 'rxjs';
+import { catchError, switchMap, throwError, from, EMPTY } from 'rxjs';
 
 @Injectable()
 export class TokenInterceptor implements HttpInterceptor {
@@ -45,6 +45,34 @@ export class TokenInterceptor implements HttpInterceptor {
                 return throwError(() => err);
                 })
             );
+            }
+            if (err instanceof HttpErrorResponse && err.status === 403) {
+                if (err.error instanceof Blob) {
+                    return from(err.error.text()).pipe(
+                        switchMap(text => {
+                            let isBanned = false;
+                            try {
+                                const parsed = JSON.parse(text);
+                                if (parsed.error === "This account has been banned." || parsed.detail === "This account has been banned.") {
+                                    isBanned = true;
+                                }
+                            } catch (e) {}
+
+                            if (isBanned) {
+                                const userId = this.authService.getUserIdFromToken();
+                                this.authService.logout();
+                                this.router.navigate(['/banned'], { queryParams: { userId } });
+                                return EMPTY;
+                            }
+                            return throwError(() => err);
+                        })
+                    );
+                } else if (err.error?.error === "This account has been banned." || err.error?.detail === "This account has been banned.") {
+                    const userId = this.authService.getUserIdFromToken();
+                    this.authService.logout();
+                    this.router.navigate(['/banned'], { queryParams: { userId } });
+                    return EMPTY;
+                }
             }
             return throwError(() => err);
         })

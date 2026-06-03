@@ -14,7 +14,13 @@ export const routes: Routes = [
             m => m.RegisterComponent
         ),
     },
-
+    {
+        path: 'banned',
+        loadComponent: () =>
+        import('../account/banned/banned.component').then(
+            m => m.BannedComponent
+        ),
+    },
     {
         path: 'home',
         loadComponent: () =>
@@ -39,8 +45,16 @@ export const routes: Routes = [
     {
         path: 'chat/:id',
         loadComponent: () =>
-        import('./main/chat/chat.component').then(
+        import('./shared/components/chat/chat.component').then(
             m => m.ChatComponent
+        ),
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'chats',
+        loadComponent: () =>
+        import('./main/chats/chats.component').then(
+            m => m.ChatsComponent
         ),
         canActivate: [AuthGuard],
     },

@@ -57,6 +57,19 @@ export class PublicationsContainerComponent extends AppComponentBase implements 
         return this._searchQuery;
     }
 
+    private _sortBy = 'latest';
+    @Input()
+    set sortBy(value: string | undefined) {
+        const normalized = value ?? 'latest';
+        if (normalized !== this._sortBy) {
+            this._sortBy = normalized;
+            this.resetAndLoad();
+        }
+    }
+    get sortBy(): string {
+        return this._sortBy;
+    }
+
     @ViewChild('scrollContainer', { static: true })
     scrollContainer!: ElementRef<HTMLElement>;
 
@@ -182,6 +195,7 @@ export class PublicationsContainerComponent extends AppComponentBase implements 
         const page$ = this._searchQuery
             ? this.publicationService.search(
                   this._searchQuery,
+                  this._sortBy,
                   currentSkip,
                   this.take
               )

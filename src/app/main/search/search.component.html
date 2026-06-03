@@ -1,22 +1,113 @@
 <div class="p-4">
     <div class="max-w-2xl mx-auto">
+        <!-- Search Bar -->
         <div class="flex items-center rounded-full overflow-hidden bg-gray-800">
-        
-        <div class="flex items-center justify-center w-12 h-12 bg-gray-700">
-            <i class="pi pi-search text-gray-400 text-lg"></i>
-        </div>
-        
-        <input
-            type="text"
-            [(ngModel)]="searchQuery"
-            [placeholder]="'SearchPosts' | localize"
-            class="flex-1 px-4 py-3 bg-transparent text-white placeholder-gray-500 border-none focus:outline-none focus:ring-0"
-        />
+            <div class="flex items-center justify-center w-12 h-12 bg-gray-700">
+                <i class="pi pi-search text-gray-400 text-lg"></i>
+            </div>
+            <input
+                type="text"
+                [(ngModel)]="searchQuery"
+                (ngModelChange)="onSearchChange()"
+                [placeholder]="(activeTab === 'people' ? 'SearchPeople' : 'SearchPosts') | localize"
+                class="flex-1 px-4 py-3 bg-transparent text-white placeholder-gray-500 border-none focus:outline-none focus:ring-0"
+            />
         </div>
 
-        <publications-container
-        [searchQuery]="searchQuery"
-        class="mt-6"
-        ></publications-container>
+        <!-- Tabs -->
+        <p-tabs [value]="0" (valueChange)="onTabChange($event)" class="search-tabs mt-4">
+            <p-tablist>
+                <p-tab [value]="0">
+                    <i class="pi pi-bolt mr-2"></i>{{ 'Top' | localize }}
+                </p-tab>
+                <p-tab [value]="1">
+                    <i class="pi pi-clock mr-2"></i>{{ 'Latest' | localize }}
+                </p-tab>
+                <p-tab [value]="2">
+                    <i class="pi pi-users mr-2"></i>{{ 'People' | localize }}
+                </p-tab>
+            </p-tablist>
+
+            <p-tabpanels>
+                <!-- Top Panel -->
+                <p-tabpanel [value]="0">
+                    <publications-container
+                        [searchQuery]="searchQuery"
+                        [sortBy]="'top'"
+                        class="mt-2 block"
+                    ></publications-container>
+                </p-tabpanel>
+
+                <!-- Latest Panel -->
+                <p-tabpanel [value]="1">
+                    <publications-container
+                        [searchQuery]="searchQuery"
+                        [sortBy]="'latest'"
+                        class="mt-2 block"
+                    ></publications-container>
+                </p-tabpanel>
+
+                <!-- People Panel -->
+                <p-tabpanel [value]="2">
+                    <div class="mt-4" *ngIf="activeTab === 'people'">
+                        <!-- No query message -->
+                        <div *ngIf="!searchQuery" class="text-center py-8 text-gray-500">
+                            <i class="pi pi-search text-4xl mb-3 block"></i>
+                            <p>{{ 'SearchPeople' | localize }}</p>
+                        </div>
+
+                        <!-- People Results -->
+                        <div *ngIf="searchQuery">
+                            <div
+                                *ngFor="let person of people"
+                                (click)="goToProfile(person.userId)"
+                                class="person-card flex items-center gap-4 p-4 rounded-xl mb-3 bg-gray-800/50 hover:bg-gray-700/60 border border-gray-700/50 cursor-pointer transition-all duration-200"
+                            >
+                                <img
+                                    [src]="person.profilePictureUrl || 'assets/default-avatar.png'"
+                                    [alt]="person.name"
+                                    class="w-12 h-12 rounded-full object-cover ring-2 ring-gray-600"
+                                />
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-semibold text-white text-base truncate">{{ person.name }}</p>
+                                    <div class="flex items-center gap-3 mt-1 text-sm text-gray-400">
+                                        <span *ngIf="person.followerCount !== undefined">
+                                            <strong class="text-gray-300">{{ person.followerCount }}</strong> {{ 'Followers' | localize }}
+                                        </span>
+                                        <span *ngIf="person.followingCount !== undefined">
+                                            <strong class="text-gray-300">{{ person.followingCount }}</strong> {{ 'Following' | localize }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div *ngIf="person.isFollowedByCurrentUser" class="text-xs text-blue-400 bg-blue-500/10 px-3 py-1 rounded-full">
+                                    {{ 'FollowingLabel' | localize }}
+                                </div>
+                            </div>
+
+                            <!-- Loading indicator -->
+                            <div *ngIf="peopleLoading" class="flex justify-center py-6">
+                                <i class="pi pi-spin pi-spinner text-2xl text-gray-400"></i>
+                            </div>
+
+                            <!-- No results -->
+                            <div *ngIf="!peopleLoading && people.length === 0" class="text-center py-8 text-gray-500">
+                                <i class="pi pi-user-minus text-4xl mb-3 block"></i>
+                                <p>{{ 'NoUsersFound' | localize }}</p>
+                            </div>
+
+                            <!-- Load more -->
+                            <div *ngIf="!peopleLoading && !peopleAllLoaded && people.length > 0" class="flex justify-center py-4">
+                                <button
+                                    (click)="loadPeople()"
+                                    class="px-6 py-2 rounded-full bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium transition-colors duration-200"
+                                >
+                                    {{ 'LoadMore' | localize }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </p-tabpanel>
+            </p-tabpanels>
+        </p-tabs>
     </div>
 </div>

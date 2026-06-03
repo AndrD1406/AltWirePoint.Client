@@ -34,10 +34,10 @@
         <div class="p-4 flex gap-2 items-center">
             <input type="file" #fileInput class="hidden" multiple accept="image/*,video/*" (change)="onFileSelected($event)">
             
-            <button pButton icon="pi pi-image" (click)="triggerFileInput()" class="p-button-rounded p-button-text text-gray-400 hover:text-white" title="Attach media (image/video)"></button>
+            <button pButton icon="pi pi-image" (click)="triggerFileInput()" class="p-button-rounded p-button-text text-gray-400 hover:text-white" title="{{ 'AttachMedia' | localize }}"></button>
             
             <input pInputText type="text" [(ngModel)]="newMessage" (keyup.enter)="sendMessage()" 
-                   placeholder="Type a message..." 
+                   placeholder="{{ 'TypeAMessage' | localize }}" 
                    class="flex-1 bg-gray-700 border-none text-white focus:ring-1 focus:ring-green-500 rounded-full px-4 py-2" />
                    
             <button pButton icon="pi pi-send" (click)="sendMessage()" [disabled]="!newMessage.trim() && selectedFiles.length === 0"

@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LocalizationService } from '../../shared/services/localization.service';
 import { AppComponentBase } from '../../shared/app-component-base';
+import { LocalizePipe } from '../../shared/pipes/localization.pipe';
 
 @Component({
     selector: 'app-settings',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, LocalizePipe],
     templateUrl: './settings.component.html',
     styleUrl: './settings.component.css'
 })

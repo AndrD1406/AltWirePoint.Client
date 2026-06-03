@@ -3,18 +3,20 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
-import { MessageComponent } from '../../shared/components/message/message.component';
-import { ChatServiceProxy, CreateChatRequest, MessageDto } from '../../shared/api/service-proxies';
-import { AuthService } from '../../shared/api/auth.service';
+import { MessageComponent } from '../message/message.component';
+import { ChatServiceProxy, CreateChatRequest, MessageDto } from '../../api/service-proxies';
+import { AuthService } from '../../api/auth.service';
 import { ActivatedRoute } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
 import * as signalR from '@microsoft/signalr';
 import { ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
+import { environment } from '../../../../environments/environment';
+import { LocalizePipe } from '../../pipes/localization.pipe';
 
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonModule, InputTextModule, MessageComponent],
+  imports: [CommonModule, FormsModule, ButtonModule, InputTextModule, MessageComponent, LocalizePipe],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.css'
 })
@@ -92,18 +94,27 @@ export class ChatComponent implements OnInit {
     setupSignalR(): void {
         const token = this.cookieService.get('jwt');
         this.hubConnection = new signalR.HubConnectionBuilder()
-            .withUrl('https://localhost:7019/chathub', {
+            .withUrl(`${environment.apiBaseUrl}/chathub`, {
                 accessTokenFactory: () => token
             })
             .withAutomaticReconnect()
             .build();
 
         this.hubConnection.on('ReceiveMessage', (messageData: any) => {
-            const msg = MessageDto.fromJS(messageData);
+            let msg: MessageDto;
+            if (messageData instanceof MessageDto) {
+                msg = messageData;
+            } else {
+                msg = MessageDto.fromJS(messageData);
+            }
+
             if (msg.chatId === this.chatId) {
-                this.messages.push(msg);
-                this.cdr.detectChanges();
-                this.scrollToBottom();
+                // Prevent duplicate messages
+                if (!this.messages.some(m => m.id === msg.id)) {
+                    this.messages.push(msg);
+                    this.cdr.detectChanges();
+                    this.scrollToBottom();
+                }
             }
         });
 
@@ -152,7 +163,11 @@ export class ChatComponent implements OnInit {
 
         this.chatService.sendMessage(this.chatId, content || ' ', fileParameters).subscribe({
             next: (msg) => {
-                // SignalR will handle pushing the new message
+                if (!this.messages.some(m => m.id === msg.id)) {
+                    this.messages.push(msg);
+                    this.cdr.detectChanges();
+                    this.scrollToBottom();
+                }
             },
             error: (err) => {
                 console.error('Failed to send message', err);
